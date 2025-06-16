@@ -8,7 +8,7 @@ If you use this code in your research, please cite the following:
 ```bibtex
 @misc{Gatto2025,
   author = {Gatto, E. C.},
-  title = {Global Partitions for Multilabel Classification with Clus},
+  title = {Global Partitions for Multilabel Classification},
   year = {2022},
   publisher = {GitHub},
   journal = {GitHub repository},
@@ -81,7 +81,7 @@ Ensure that all necessary Java, R, and Python libraries are installed on your sy
 You can use the [Conda Environment](https://1drv.ms/u/s!Aq6SGcf6js1mw4hbhU9Raqarl8bH8Q?e=IA2aQs) that I created to perform this experiment. Below are the links to download the files. Try to use the command below to extract the environment to your computer:
 
 ```
-conda env create -f AmbienteTeste.yaml
+conda env create -f Teste.yml
 ```
 
 For more information on Conda environments, refer to the [official documentation](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
@@ -91,15 +91,16 @@ Alternatively, you can run the code using an [AppTainer container](https://1drv.
 ### STEP 4: Configuration File ⚙️
 You will need a `.csv` configuration file with the following fields:
 
-| Config           | Value                                                                 |
-|------------------|-----------------------------------------------------------------------|
+| Config           | Value                                                                    |
+|------------------|--------------------------------------------------------------------------|
+| FolderScripts    | Absolute path to the R folder scripts                                    |
 | Dataset_Path     | Absolute path to the folder where the dataset's `.tar.gz` file is stored |
-| Temporary_Path   | Absolute path to the folder for temporary processing                  |
-| Implementation   | Choose from "clus", "mulan", "rf", or "utiml"                         |
-| Dataset_Name     | Dataset name (from `datasets-original.csv`)                           |
-| Number_Dataset   | Dataset number (from `datasets-original.csv`)                         |
-| Number_Folds     | Number of folds for cross-validation                                  |
-| Number_Cores     | Number of cores for parallel processing                               |
+| Temporary_Path   | Absolute path to the folder for temporary processing                     |
+| Implementation   | Choose from "clus", "mulan", "rf", or "utiml"                            |
+| Dataset_Name     | Dataset name (from `datasets-original.csv`)                              |
+| Number_Dataset   | Dataset number (from `datasets-original.csv`)                            |
+| Number_Folds     | Number of folds for cross-validation                                     |
+| Number_Cores     | Number of cores for parallel processing                                  |
 
 We recommend using directories like `/dev/shm`, `/tmp`, or `/scratch` for temporary storage.
 
