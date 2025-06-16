@@ -41,11 +41,15 @@
 
 
 
+
 ###############################################################################
 # SET WORKSAPCE                                                               #
 ###############################################################################
-FolderRoot = "~/Global-Partitions"
-FolderScripts = "~/Global-Partitions/R"
+#library(here)
+#library(stringr)
+#FolderRoot <- here::here()
+#FolderScripts <- here::here("R")
+
 
 
 
@@ -447,8 +451,11 @@ properties.datasets <- function(parameters){
 ###############################################################################
 directories <- function(parameters){
   
-  FolderRoot = "~/Global-Partitions"
-  FolderScripts = "~/Global-Partitions/R"
+  #library(here)
+  #library(stringr)
+  #FolderRoot <- here::here()
+  #FolderScripts <- here::here("R")
+  
   
   retorno = list()
   
@@ -470,6 +477,39 @@ directories <- function(parameters){
   }
   retorno$FolderResults = parameters$Config.File$Folder.Results
   
+  #############################################################################
+  #
+  #############################################################################
+  FolderScripts = paste(FolderRoot, "/R", sep="")
+  if(dir.exists(FolderScripts ) == TRUE){
+    setwd(FolderScripts)
+    dir_FolderScripts  = dir(FolderScripts )
+    n_FolderScripts = length(dir_FolderScripts )
+  } else {
+    dir.create(FolderScripts)
+    setwd(FolderScripts)
+    dir_FolderScripts  = dir(FolderScripts )
+    n_FolderScripts = length(dir_FolderScripts )
+  }
+  retorno$FolderScripts = FolderScripts
+  
+  
+  #############################################################################
+  #
+  #############################################################################
+  FolderReports = paste(FolderRoot, "/Reports", sep="")
+  if(dir.exists(FolderReports  ) == TRUE){
+    setwd(FolderReports )
+    dir_FolderReports = dir(FolderReports)
+    n_FolderReports = length(dir_FolderReports )
+  } else {
+    dir.create(FolderReports)
+    setwd(FolderReports)
+    dir_FolderReports = dir(FolderReports)
+    n_FolderReports = length(dir_FolderReports )
+  }
+  retorno$FolderReports = FolderReports
+  
   
   
   #############################################################################
@@ -487,6 +527,22 @@ directories <- function(parameters){
     n_folderUtils = length(dir_folderUtils)
   }
   retorno$FolderUtils = folderUtils
+  
+  #############################################################################
+  #
+  #############################################################################
+  folderPython = paste(FolderRoot, "/Python", sep="")
+  if(dir.exists(folderPython) == TRUE){
+    setwd(folderPython)
+    dir_folderPython = dir(folderPython)
+    n_folderPython = length(dir_folderPython)
+  } else {
+    dir.create(folderPython)
+    setwd(folderPython)
+    dir_folderPython = dir(folderPython)
+    n_folderPython = length(dir_folderPython)
+  }
+  retorno$FolderPython = folderPython
   
   
   ###############################################################################
@@ -859,20 +915,21 @@ matrix.confusao <- function(true, pred, type, salva, nomes.rotulos){
   write.csv(matriz_confusao_por_rotulos, name)
 }
 
-
-
+##############################################################
+#
+##############################################################
 avaliacao <- function(f, y_true, y_pred, salva, nome){
   
-  salva.0 = paste(salva, "/", nome, "-conf-mat.txt", sep="")
-  sink(file=salva.0, type="output")
+  #salva.0 = paste(salva, "/", nome, "-conf-mat.txt", sep="")
+  #sink(file=salva.0, type="output")
   confmat = multilabel_confusion_matrix(y_true, y_pred)
-  print(confmat)
-  sink()
+  #print(confmat)
+  #sink()
   
   resConfMat = multilabel_evaluate(confmat)
   resConfMat = data.frame(resConfMat)
   names(resConfMat) = paste("Fold-", f, sep="")
-  salva.1 = paste(salva, "/", nome, "-evaluated.csv", sep="")
+  salva.1 = paste(salva, "/", nome, ".csv", sep="")
   write.csv(resConfMat, salva.1)
   
   conf.mat = data.frame(confmat$TPl, confmat$FPl,
@@ -887,7 +944,7 @@ avaliacao <- function(f, y_true, y_pred, salva, nome){
   conf.mat.2 = data.frame(conf.mat, conf.mat.perc, wrong, correct, 
                           wrong.perc, correct.perc)
   salva.2 = paste(salva, "/", nome, "-utiml.csv", sep="")
-  write.csv(conf.mat.2, salva.2)
+  #write.csv(conf.mat.2, salva.2)
   
   
 }

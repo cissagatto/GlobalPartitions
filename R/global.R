@@ -53,19 +53,10 @@ rm(list=ls())
 cat("\n################################")
 cat("\n# Set Work Space               #")
 cat("\n###############################\n\n")
-FolderRoot = "~/Global-Partitions"
-FolderScripts = "~/Global-Partitions/R"
+library(here)
+library(stringr)
+FolderRoot <- here::here()
 
-
-cat("\n########################################")
-cat("\n# Loading R Sources                    #")
-cat("\n########################################\n\n")
-
-setwd(FolderScripts)
-source("libraries.R")
-
-setwd(FolderScripts)
-source("utils.R")
 
 
 cat("\n########################################")
@@ -97,9 +88,15 @@ args <- commandArgs(TRUE)
 
 config_file <- args[1]
 
-# config_file = "~/Global-Partitions/config-files/gr-emotions.csv"
 
-parameters$Config.File.Name = config_file
+# config_file = "~/GlobalPartitions/config-files/rf/gr-emotions.csv"
+
+
+# /home/cissagatto/Documentos/GlobalPartitions/config-files/rf
+
+
+
+parameters$Config.File$Name = config_file
 if(file.exists(config_file)==FALSE){
   cat("\n################################################################")
   cat("#\n Missing Config File! Verify the following path:              #")
@@ -119,45 +116,47 @@ config = data.frame(read.csv(config_file))
 print(config)
 cat("\n########################################\n\n")
 
+
 cat("\n########################################")
 cat("\n# Getting Parameters                   #\n")
 cat("\n########################################")
-dataset_path = toString(config$Value[1])
+FolderScripts = toString(config$Value[1])
+FolderScripts = str_remove(FolderScripts, pattern = " ")
+parameters$Directories$FolderScripts = FolderScripts
+
+dataset_path = toString(config$Value[2])
 dataset_path = str_remove(dataset_path, pattern = " ")
 parameters$Config.File$Dataset.Path = dataset_path
 
-folderResults = toString(config$Value[2]) 
+folderResults = toString(config$Value[3]) 
 folderResults = str_remove(folderResults, pattern = " ")
 parameters$Config.File$Folder.Results = folderResults
 
-implementation = toString(config$Value[3])
+implementation = toString(config$Value[4])
 implementation = str_remove(implementation, pattern = " ")
 parameters$Config.File$Implementation = implementation
 
-dataset_name = toString(config$Value[4])
+dataset_name = toString(config$Value[5])
 dataset_name = str_remove(dataset_name, pattern = " ")
 parameters$Config.File$Dataset.Name = dataset_name
 
-number_dataset = as.numeric(config$Value[5])
+number_dataset = as.numeric(config$Value[6])
 parameters$Config.File$Number.Dataset = number_dataset
 
-number_folds = as.numeric(config$Value[6])
+number_folds = as.numeric(config$Value[7])
 parameters$Config.File$Number.Folds = number_folds
 
-number_cores = as.numeric(config$Value[7])
+number_cores = as.numeric(config$Value[8])
 parameters$Config.File$Number.Cores = number_cores
-
-# cat("\n################################################################\n")
-# print(parameters$Config.File)
-# cat("\n################################################################\n\n")
-
 
 ds = datasets[number_dataset,]
 parameters$Dataset.Info = ds
 
-# cat("\n################################################################\n")
-# print(ds)
-# cat("\n################################################################\n\n")
+cat("\n########################################")
+cat("\n# Loading R Sources                    #")
+cat("\n########################################\n\n")
+source(file.path(FolderScripts, "libraries.R"))
+source(file.path(FolderScripts, "utils.R"))
 
 
 cat("\n########################################")
@@ -171,10 +170,6 @@ cat("\n# Get directories             #")
 cat("\n###############################\n\n")
 diretorios <- directories(parameters)
 parameters$Directories = diretorios
-
-# cat("\n################################################################\n")
-# print(parameters$Directories)
-# cat("\n################################################################\n\n")
 
 
 cat("\n####################################################################")
@@ -228,14 +223,12 @@ if(file.exists(str00)==FALSE){
 
 
 
-
 ##############################################################################
 #
 ##############################################################################
 if(implementation=="clus"){
   
-  setwd(FolderScripts)
-  source("run-clus.R")
+  source(file.path(parameters$Directories$FolderScripts, "run-clus.R"))
   
   cat("\n\n############################################################")
   cat("\n# RSCRIPT GLOBAL START                                     #")
@@ -259,8 +252,7 @@ if(implementation=="clus"){
   
 } else if(implementation=="rf"){
   
-  setwd(FolderScripts)
-  source("run-rf.R")
+  source(file.path(parameters$Directories$FolderScripts, "run-rf.R"))
   
   cat("\n\n############################################################")
      cat("\n# RSCRIPT GLOBAL RANDOM FORESTS START                     #")
@@ -286,28 +278,30 @@ if(implementation=="clus"){
   cat("\n\n###################################################################")
   cat("\n# GLOBAL: COMPRESS RESULTS                                      #")
   cat("\n#####################################################################\n\n")
-  #str3 = paste("tar -zcvf ", parameters$Directories$FolderGlobal, "/",
-  #             parameters$Dataset.Info$Name, "-results-global.tar.gz ",
-  #             parameters$Directories$FolderGlobal, sep="")
-  #print(system(str3))
+  tar_file <- paste0(parameters$Directories$FolderResults, "/", 
+                     parameters$Dataset.Info$Name,
+                     "-results-global.tar.gz")
   
-  str_01 = paste("tar -zcvf ", parameters$Directories$FolderGlobal, "/",
-               parameters$Dataset.Info$Name, "-results-global.tar.gz -C ",
-               parameters$Directories$FolderGlobal, " .", sep="")
-  print(system(str_01))
+  str_01 <- paste(
+    "tar -zcvf", tar_file,
+    "-C", parameters$Directories$FolderGlobal, "."
+  )
+  cat("\nComando:\n", str_01, "\n")
+  system(str_01)
+  
   
   
   cat("\n\n###################################################################")
   cat("\n# ====> GPC: COPY TO HOME                                     #")
   cat("\n#####################################################################\n\n")
+  str_0 = parameters$Directories$FolderReports
+  if(dir.exists(str_0)==FALSE){dir.create(str0)}
   
-  str_02 = "~/Global-Partitions/Reports/"
-  if(dir.exists(str_02)==FALSE){dir.create(str0)}
+  str_03 = paste(parameters$Directories$FolderResults, "/",
+                 parameters$Dataset.Info$Name,
+                 "-results-global.tar.gz", sep="")
   
-  str_03 = paste(parameters$Directories$FolderGlobal, "/",
-                 dataset_name, "-results-global.tar.gz", sep="")
-  
-  str_04 = paste("cp ", str_03, " ", str_02, sep="")
+  str_04 = paste("cp ", str_03, " ", str_0, sep="")
   print(system(str_04))
   
   
@@ -354,7 +348,7 @@ cat("\n\n#######################################################")
 cat("\n# CLEAN                                               #")
 cat("\n#######################################################\n\n")
 cat("\nDelete folder \n")
-str5 = paste("rm -r ", folderResults, sep="")
+str5 = paste("rm -r ", parameters$Directories$FolderResults, sep="")
 print(system(str5))
 
 

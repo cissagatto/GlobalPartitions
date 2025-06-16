@@ -39,14 +39,16 @@
 #                                                                            #
 ##############################################################################
 
-#getwd()
+
 
 
 ###############################################################################
 # SET WORKSAPCE                                                               #
 ###############################################################################
-FolderRoot = "~/Global-Partitions"
-FolderScripts = "~/Global-Partitions/R"
+#library(here)
+#library(stringr)
+#FolderRoot <- here::here()
+#FolderScripts <- here::here("R")
 
 
 
@@ -55,8 +57,12 @@ FolderScripts = "~/Global-Partitions/R"
 ###########################################################################
 run.rf <- function(parameters){
   
-  setwd(FolderScripts)
-  source("global-rf.R")
+  
+  cat("\n########################################")
+  cat("\n# Loading R Sources                    #")
+  cat("\n########################################\n\n")
+  source(file.path(parameters$Directories$FolderScripts, "global-rf.R"))
+  
   
   if(parameters$Config.File$Number.Cores == 0){
     
@@ -108,7 +114,7 @@ run.rf <- function(parameters){
   cat("\n\n#################################################")
   cat("\n# RUN: Properties                               #")
   cat("\n#################################################\n\n")
-  time.properties = system.time(properties.datasets(parameters))
+  #time.properties = system.time(properties.datasets(parameters))
   
   
   cat("\n\n####################################################")
@@ -126,7 +132,7 @@ run.rf <- function(parameters){
   cat("\n\n##########################################################")
     cat("\n# RUN: Gather Evaluated Measures                         #")
     cat("\n##########################################################\n\n")
-  time.gather.evaluate = system.time(gather.eval.global.python(parameters))
+  time.gather.evaluate = system.time(gather.eval.python.silho(parameters))
   
   
   cat("\n\n###########################################################")

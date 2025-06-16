@@ -39,37 +39,115 @@
 #                                                                            #
 ##############################################################################
 
-#getwd()
-
 
 ###############################################################################
 # SET WORKSAPCE                                                               #
 ###############################################################################
-FolderRoot = "~/Global-Partitions"
-FolderScripts = "~/Global-Partitions/R"
+library(here)
+library(stringr)
+FolderRoot <- here::here()
+FolderScripts <- here::here("R")
 
-
-##############################################################################
-# LOAD EXTERNAL LIBRARIES                                                    #
-##############################################################################
-
-library("mldr", quietly = TRUE) 
-library("readr", quietly = TRUE) 
-library("foreign", quietly = TRUE) 
-library("stringr", quietly = TRUE) 
-library("plyr", quietly = TRUE) 
-library("dplyr", quietly = TRUE) 
-library("reshape2", quietly = TRUE) 
-library("AggregateR", quietly = TRUE) 
-library("parallel", quietly = TRUE) 
-library("utiml", quietly = TRUE)
-library("RWeka", quietly = TRUE) 
-library("rJava", quietly = TRUE) 
-library("foreach", quietly = TRUE) 
-library("doParallel", quietly = TRUE)
 
 
 ###############################################################################
-# Please, any errors, contact us: elainececiliagatto@gmail.com                #
-# Thank you very much!                                                        #
+#' @title Install and Load Required Packages
+#' @description
+#' This script verifies whether a list of required R packages are installed on the user's system.
+#' If any of the packages are missing, it automatically installs them (from CRAN or GitHub as needed)
+#' and loads them into the current R session. This ensures that all dependencies are satisfied.
+#'
+#' @details
+#' - Supports CRAN, base, and GitHub packages.
+#' - Automatically installs 'devtools' if needed for GitHub installations.
+#' - Provides progress messages and basic error handling.
+#' 
+#' @author 
+#' @date 2025-06-12
+
+# List of required CRAN packages
+cran_packages <- c(
+  "foreign", "dplyr", "stringr", "foreach", "doParallel",
+  "rJava", "RWeka", "mldr", "utiml", "parallel", "AggregateR",
+  "reshape2","plyr","readr", "here"
+)
+
+# Base packages (already included with R)
+base_packages <- c("parallel")
+
+# GitHub packages: named list with package name and corresponding repository
+github_packages <- list(
+  AggregateR = "guiguegon/AggregateR"
+)
+
+#' @description Install a single CRAN package if not already installed
+#' @param pkg Name of the package
+install_cran_package <- function(pkg) {
+  if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+    message(paste("Installing CRAN package:", pkg))
+    tryCatch({
+      install.packages(pkg, dependencies = TRUE)
+      library(pkg, character.only = TRUE, quietly = TRUE)
+      message(paste("Package", pkg, "successfully installed."))
+    }, error = function(e) {
+      message(paste("Error installing package", pkg, ":", e$message))
+    })
+  } else {
+    message(paste("Package", pkg, "is already installed."))
+  }
+}
+
+
 ###############################################################################
+#' @description Install a single GitHub package if not already installed
+#' @param pkg Name of the package
+#' @param repo GitHub repository in the format 'username/repo'
+install_github_package <- function(pkg, repo) {
+  if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+    if (!require("devtools", character.only = TRUE, quietly = TRUE)) {
+      install.packages("devtools")
+      library(devtools, quietly = TRUE)
+    }
+    message(paste("Installing GitHub package:", pkg))
+    tryCatch({
+      devtools::install_github(repo)
+      library(pkg, character.only = TRUE, quietly = TRUE)
+      message(paste("Package", pkg, "successfully installed."))
+    }, error = function(e) {
+      message(paste("Error installing GitHub package", pkg, ":", e$message))
+    })
+  } else {
+    message(paste("Package", pkg, "is already installed."))
+  }
+}
+
+
+###############################################################################
+# Load base packages (no installation required)
+for (pkg in base_packages) {
+  library(pkg, character.only = TRUE, quietly = TRUE)
+  message(paste("Base package", pkg, "loaded."))
+}
+
+
+###############################################################################
+# Install and load CRAN packages
+for (pkg in cran_packages) {
+  install_cran_package(pkg)
+}
+
+
+###############################################################################
+# Install and load GitHub packages
+for (pkg in names(github_packages)) {
+  install_github_package(pkg, github_packages[[pkg]])
+}
+
+message("✅ All packages have been successfully verified and installed!")
+
+
+
+##################################################################################################
+# Please, any errors, contact us: elainececiliagatto@gmail.com                                   #
+# Thank you very much!                                                                           #
+##################################################################################################
