@@ -135,7 +135,8 @@ gather.files.python <- function(parameters){
 ##############################################################################
 execute.global.python <- function(parameters){
   
-  # f = 1
+  f = 2
+
   RfGlobalParalel <- foreach(f = 1:parameters$Config.File$Number.Folds) %dopar%{
   # while(f<=parameters$Config.File$Number.Folds){
     
@@ -198,8 +199,8 @@ execute.global.python <- function(parameters){
                         nome.tr.csv, " ",
                         nome.vl.csv,  " ",
                         nome.ts.csv, " ", 
-                        start = as.numeric(parameters$Dataset.Info$AttEnd), " ", 
-                        FolderSplit,
+                        start = as.numeric(parameters$Dataset.Info$LabelStart), " ",                         FolderSplit, " ", 
+                        fold = f,
                         sep="")
     
     # /tmp/gr-emotions/Dataset/emotions/CrossValidation/Tr

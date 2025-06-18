@@ -45,18 +45,10 @@ import platform
 import os
 import io
 
-system = platform.system()
-if system == 'Windows':
-    user_profile = os.environ['USERPROFILE']
-    FolderRoot = os.path.join(user_profile, 'Documents', 'MultiLabelEvaluationMetrics', 'src')
-elif system in ['Linux', 'Darwin']:  # 'Darwin' is the system name for macOS
-    FolderRoot = os.path.expanduser('~/LCCML/src')
-else:
-    raise Exception('Unsupported operating system')
-
-os.chdir(FolderRoot)
-current_directory = os.getcwd()
-sys.path.append('..')
+#FolderRoot = os.path.expanduser('/lapix/arquivos/elaine/GlobalPartitions/Python')
+#os.chdir(FolderRoot)
+#current_directory = os.getcwd()
+#sys.path.append('..')
 
 import time
 import pickle
@@ -79,6 +71,7 @@ if __name__ == '__main__':
     test = pd.read_csv(sys.argv[3])     # test set
     start = int(sys.argv[4])            # label start index
     directory = sys.argv[5]             # directory to save predictions
+    fold = sys.argv[6]             # directory to save predictions
 
     # Example (for local testing)
     # train = pd.read_csv("/home/cissagatto/Global/data/emotions-Split-Tr-1.csv")
@@ -86,6 +79,15 @@ if __name__ == '__main__':
     # valid = pd.read_csv("/home/cissagatto/Global/data/emotions-Split-Vl-1.csv")
     # start = 72
     # directory = "/home/cissagatto/Global"
+
+    print("\n\n%==============================================%")
+    print("label train: ", sys.argv[1])
+    print("label valid: ", sys.argv[2])
+    print("label test: ", sys.argv[3])
+    print("label start: ", sys.argv[4])
+    print("directory: ", sys.argv[5])
+    print("fold: ", sys.argv[6])
+    print("%==============================================%\n\n")
      
     # Merge train and validation sets
     train = pd.concat([train, valid], axis=0).reset_index(drop=True)
@@ -127,7 +129,7 @@ if __name__ == '__main__':
     end_test_time = time.time()
     testing_time_proba = end_test_time - start_test_time
 
-        # Prepare dataframe
+    # Prepare dataframe
     timing_data = [
         ["training_time", training_time],
         ["testing_time_bin", testing_time_bin],
@@ -162,9 +164,6 @@ if __name__ == '__main__':
     # Save to CSV
     name_csv = os.path.join(directory, "model-sizes.csv")
     df_sizes.to_csv(name_csv, index=False)
-
-    # Ground truth labels
-    y_true = pd.DataFrame(Y_test)
     
     # Set output file paths
     name_true = os.path.join(directory, "y_true.csv")
@@ -174,7 +173,7 @@ if __name__ == '__main__':
     
     # Save true labels and binary predictions
     y_pred_bin.to_csv(name_pred_bin, index=False)
-    y_true.to_csv(name_true, index=False)    
+    Y_test.to_csv(name_true, index=False)    
     
     # Save probabilistic predictions
     ldf1 = []
@@ -185,13 +184,14 @@ if __name__ == '__main__':
         ldf1.append(res1)      
     
     final = pd.concat(ldf1, axis=1)
-    final.to_csv(name_pred_proba_original, index=False)
+    final.to_csv(name_pred_proba_original, index=False)    
 
     # Seleciona apenas as colunas cujo nome termina com '_1'
     final_1 = final.loc[:, final.columns.str.endswith('_1')]
     final_1.columns = labels_y_test
-    final_1.to_csv(name_pred_proba, index=False)
+    final_1.to_csv(name_pred_proba, index=False)    
 
-    res_curves = eval.multilabel_curves_measures(y_true, final_1)    
+    print("\nCOMPUTE CURVES")
+    res_curves = eval.multilabel_curves_measures(Y_test, final_1)    
     name = (directory + "/results-python.csv") 
     res_curves.to_csv(name, index=False)

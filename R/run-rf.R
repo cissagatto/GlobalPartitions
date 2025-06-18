@@ -114,7 +114,7 @@ run.rf <- function(parameters){
   cat("\n\n#################################################")
   cat("\n# RUN: Properties                               #")
   cat("\n#################################################\n\n")
-  #time.properties = system.time(properties.datasets(parameters))
+  time.properties = system.time(properties.datasets(parameters))
   
   
   cat("\n\n####################################################")

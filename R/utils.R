@@ -84,6 +84,8 @@ properties.datasets <- function(parameters){
   scumble.cv = c(0)
   tcs = c(0)
   
+  zeros = data.frame()
+  
   measures.treino = data.frame(fold, num.attributes, num.instances, num.inputs,
                                num.labels, num.labelsets, num.single.labelsets,
                                max.frequency, cardinality, density, meanIR,
@@ -104,19 +106,19 @@ properties.datasets <- function(parameters){
                             max.frequency, cardinality, density, meanIR,
                             scumble, scumble.cv, tcs)
   
-  folder = paste(parameters$Directories$FolderGlobal, 
-                 "/", parameters$Dataset.Name,
+  folderProperties = paste(parameters$Directories$FolderResults, 
+                 "", parameters$Dataset.Name,
                  "/Properties", sep="")
-  if(dir.exists(folder)==FALSE){dir.create(folder)}
+  if(dir.exists(folderProperties)==FALSE){dir.create(folderProperties)}
   
   
   f = 1
   while(f<=parameters$Config.File$Number.Folds){
     
-    cat("\nFold ", f)
+    cat("\n\n\n%------------Fold [", f, "]------------%\n\n\n")
     
     ####################################################################
-    folderSave = paste(folder, "/Split-", f, sep="")
+    folderSave = paste(folderProperties , "/Split-", f, sep="")
     if(dir.exists(folderSave)==FALSE){dir.create(folderSave)}
     
     
@@ -134,16 +136,22 @@ properties.datasets <- function(parameters){
                  "-Split-Tr-", f, ".csv", sep="")
     treino = data.frame(read.csv(nome))
     
+    
+    ####################################################################
     nome = paste(parameters$Directories$FolderCVTS, 
                  "/", parameters$Config.File$Dataset.Name,
                  "-Split-Ts-", f, ".csv", sep="")
     teste = data.frame(read.csv(nome))
     
+    
+    ####################################################################
     nome = paste(parameters$Directories$FolderCVVL, 
                  "/", parameters$Config.File$Dataset.Name,
                  "-Split-Vl-", f, ".csv", sep="")
     val = data.frame(read.csv(nome))
     
+    
+    ####################################################################
     tv = rbind(treino, val)
     
     
@@ -251,7 +259,7 @@ properties.datasets <- function(parameters){
     write.csv(todos, name)
     
     
-    ##########################################################################
+    ####################################################
     treino.num.positive.instances = data.frame(treino.num.positive.instances)
     treino.num.negative.instances = data.frame(treino.num.negative.instances)
     
@@ -351,24 +359,55 @@ properties.datasets <- function(parameters){
     
     
     ##########################################################################
-    labels = data.frame(mldr.treino$labels)
+    labels.train = data.frame(mldr.treino$labels)
     name = paste(folderSave, "/labels-train-", f, ".csv", sep="")
-    write.csv(labels, name)
+    write.csv(labels.train, name)
     
-    rm(labels)
-    labels = data.frame(mldr.teste$labels)
+    if(any(labels.train$count == 0)) {
+      zero_counts <- labels.train[labels.train$count == 0, ]
+      zeros = rbind(zeros, zero_counts)
+      cat("\n\ntem zeros\n\n")
+    } else {
+      cat("\n\nnão tem zeros\n\n")
+    }
+    
+    labels.test = data.frame(mldr.teste$labels)
     name = paste(folderSave, "/labels-test-", f, ".csv", sep="")
-    write.csv(labels, name)
+    write.csv(labels.test, name)
     
-    rm(labels)
-    labels = data.frame(mldr.val$labels)
+    if(any(labels.test$count == 0)) {
+      zero_counts <- labels.test[labels.test$count == 0, ]
+      zeros = rbind(zeros, zero_counts)
+      cat("\n\ntem zeros\n\n")
+    } else {
+      cat("\n\nnão tem zeros\n\n")
+    }
+    
+    
+    labels.val = data.frame(mldr.val$labels)
     name = paste(folderSave, "/labels-val-", f, ".csv", sep="")
-    write.csv(labels, name)
+    write.csv(labels.val, name)
     
-    rm(labels)
-    labels = data.frame(mldr.tv$labels)
+    if(any(labels.val$count == 0)) {
+      zero_counts <- labels.val[labels.val$count == 0, ]
+      zeros = rbind(zeros, zero_counts)
+      cat("\n\ntem zeros\n\n")
+    } else {
+      cat("\n\nnão tem zeros\n\n")
+    }
+    
+    
+    labels.tv = data.frame(mldr.tv$labels)
     name = paste(folderSave, "/labels-tv-", f, ".csv", sep="")
-    write.csv(labels, name)
+    write.csv(labels.tv, name)
+    
+    if(any(labels.tv$count == 0)) {
+      zero_counts <- labels.tv[labels.tv$count == 0, ]
+      zeros = rbind(zeros, zero_counts)
+      cat("\n\nTEM ZEROS\n\n")
+    } else {
+      cat("\n\nnão tem zeros\n\n")
+    }
     
     
     ##########################################################################  
@@ -401,45 +440,51 @@ properties.datasets <- function(parameters){
     
     
     ##########################################################################  
-    # name = paste(folderSave , "/plot-train-fold-", f, ".pdf", sep="")
-    # pdf(name, width = 10, height = 8)
-    # print(plot(mldr.treino))
-    # dev.off()
-    # cat("\n")
-    # 
-    # name = paste(folderSave , "/plot-test-fold-", f, ".pdf", sep="")
-    # pdf(name, width = 10, height = 8)
-    # print(plot(mldr.teste))
-    # dev.off()
-    # cat("\n")
-    # 
-    # name = paste(folderSave , "/plot-val-fold-", f, ".pdf", sep="")
-    # pdf(name, width = 10, height = 8)
-    # print(plot(mldr.val))
-    # dev.off()
-    # cat("\n")
-    # 
-    # name = paste(folderSave , "/plot-tv-fold-", f, ".pdf", sep="")
-    # pdf(name, width = 10, height = 8)
-    # print(plot(mldr.tv))
-    # dev.off()
-    # cat("\n")
+    name = paste(folderSave , "/plot-train-fold-", f, ".pdf", sep="")
+    pdf(name, width = 10, height = 8)
+    print(plot(mldr.treino))
+    dev.off()
+    cat("\n")
+     
+    name = paste(folderSave , "/plot-test-fold-", f, ".pdf", sep="")
+    pdf(name, width = 10, height = 8)
+    print(plot(mldr.teste))
+    dev.off()
+    cat("\n")
+
+    name = paste(folderSave , "/plot-val-fold-", f, ".pdf", sep="")
+    pdf(name, width = 10, height = 8)
+    print(plot(mldr.val))
+    dev.off()
+    cat("\n")
+
+    name = paste(folderSave , "/plot-tv-fold-", f, ".pdf", sep="")
+    pdf(name, width = 10, height = 8)
+    print(plot(mldr.tv))
+    dev.off()
+    cat("\n")
     
     
     f = f + 1
     gc()
   }
   
-  name = paste(folder , "/properties-tv.csv", sep="")
-  write.csv(measures.tv[-1,], name, row.names = FALSE)
+  zeros
   
-  name = paste(folder , "/properties-test.csv", sep="")
+  name = paste0(parameters$Directories$FolderResults, 
+                "/Properties/properties-tv.csv")
+  write.csv(data.frame(measures.tv[-1,]), name, row.names = FALSE)
+  
+  name = paste0(parameters$Directories$FolderResults , 
+                "/Properties/properties-test.csv", sep="")
   write.csv(measures.teste[-1,], name, row.names = FALSE)
   
-  name = paste(folder , "/properties-train.csv", sep="")
+  name = paste0(parameters$Directories$FolderResults, 
+                "/Properties/properties-train.csv", sep="")
   write.csv(measures.treino[-1,], name, row.names = FALSE)
   
-  name = paste(folder , "/properties-val.csv", sep="")
+  name = paste0(parameters$Directories$FolderResults , 
+                "/Properties/properties-val.csv", sep="")
   write.csv(measures.val[-1,], name, row.names = FALSE)
   
   

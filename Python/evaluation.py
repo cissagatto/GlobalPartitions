@@ -29,18 +29,10 @@ import sys
 import platform
 import os
 
-system = platform.system()
-if system == 'Windows':
-    user_profile = os.environ['USERPROFILE']
-    FolderRoot = os.path.join(user_profile, 'Documents', 'MultiLabelEvaluationMetrics', 'src')
-elif system in ['Linux', 'Darwin']:  # 'Darwin' is the system name for macOS
-    FolderRoot = os.path.expanduser('~/LCCML/src')
-else:
-    raise Exception('Unsupported operating system')
-
-os.chdir(FolderRoot)
-current_directory = os.getcwd()
-sys.path.append('..')
+#FolderRoot = os.path.expanduser('/lapix/arquivos/elaine/GlobalPartitions/Python')
+#os.chdir(FolderRoot)
+#current_directory = os.getcwd()
+#sys.path.append('..')
 
 
 import pandas as pd
@@ -459,24 +451,25 @@ def multilabel_curves_measures(true_labels: pd.DataFrame, pred_scores: pd.DataFr
     average_precision_macro = average_precision_score(true_labels, pred_scores, average='macro')
     average_precision_micro = average_precision_score(true_labels, pred_scores, average='micro')
     average_precision_weighted = average_precision_score(true_labels, pred_scores, average='weighted')
-    average_precision_samples = average_precision_score(true_labels, pred_scores, average='samples')    
+    #average_precision_samples = average_precision_score(true_labels, pred_scores, average='samples')    
     
     # ROC AUC Scores
     roc_auc_macro = roc_auc_score(true_labels, pred_scores, average='macro')
     roc_auc_micro = roc_auc_score(true_labels, pred_scores, average='micro')
     roc_auc_weighted = roc_auc_score(true_labels, pred_scores, average='weighted')
-    roc_auc_samples = roc_auc_score(true_labels, pred_scores, average='samples')      
+    #roc_auc_samples = roc_auc_score(true_labels, pred_scores, average='samples')      
+
 
     # Store all metrics in a dictionary
     metrics_dict = {
         'auprc_macro': average_precision_macro,
         'auprc_micro': average_precision_micro,
         'auprc_weighted': average_precision_weighted,
-        'auprc_samples': average_precision_samples,
+        # 'auprc_samples': average_precision_samples,
         'roc_auc_macro': roc_auc_macro,
         'roc_auc_micro': roc_auc_micro,
         'roc_auc_weighted': roc_auc_weighted,
-        'roc_auc_samples': roc_auc_samples
+        # 'roc_auc_samples': roc_auc_samples
     }
 
     # Convert dictionary to DataFrame

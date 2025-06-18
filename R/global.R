@@ -89,8 +89,7 @@ args <- commandArgs(TRUE)
 config_file <- args[1]
 
 
-# config_file = "~/GlobalPartitions/config-files/rf/gr-emotions.csv"
-
+# config_file = "~/GlobalPartitions/config-files/gr-flags.csv"
 
 # /home/cissagatto/Documentos/GlobalPartitions/config-files/rf
 
