@@ -1,9 +1,0 @@
-Config, Value
-FolderScripts, /lapix/arquivos/elaine/GlobalPartitions/R
-Dataset_Path, /lapix/arquivos/elaine/GlobalPartitions/Datasets
-Temporary_Path, /tmp/gr-emotions
-Implementation, rf
-Dataset_Name, emotions
-Number_Dataset, 26
-Number_Folds, 10
-Number_Cores, 10

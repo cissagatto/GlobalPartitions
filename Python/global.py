@@ -191,7 +191,7 @@ if __name__ == '__main__':
     final_1.columns = labels_y_test
     final_1.to_csv(name_pred_proba, index=False)    
 
-    print("\nCOMPUTE CURVES")
-    res_curves = eval.multilabel_curves_measures(Y_test, final_1)    
+    # print("\nCOMPUTE CURVES")
+    res_curves = eval.multilabel_curve_metrics(Y_test, final_1)    
     name = (directory + "/results-python.csv") 
     res_curves.to_csv(name, index=False)

@@ -440,29 +440,29 @@ properties.datasets <- function(parameters){
     
     
     ##########################################################################  
-    name = paste(folderSave , "/plot-train-fold-", f, ".pdf", sep="")
-    pdf(name, width = 10, height = 8)
-    print(plot(mldr.treino))
-    dev.off()
-    cat("\n")
-     
-    name = paste(folderSave , "/plot-test-fold-", f, ".pdf", sep="")
-    pdf(name, width = 10, height = 8)
-    print(plot(mldr.teste))
-    dev.off()
-    cat("\n")
-
-    name = paste(folderSave , "/plot-val-fold-", f, ".pdf", sep="")
-    pdf(name, width = 10, height = 8)
-    print(plot(mldr.val))
-    dev.off()
-    cat("\n")
-
-    name = paste(folderSave , "/plot-tv-fold-", f, ".pdf", sep="")
-    pdf(name, width = 10, height = 8)
-    print(plot(mldr.tv))
-    dev.off()
-    cat("\n")
+    # name = paste(folderSave , "/plot-train-fold-", f, ".pdf", sep="")
+    # pdf(name, width = 10, height = 8)
+    # print(plot(mldr.treino))
+    # dev.off()
+    # cat("\n")
+    #  
+    # name = paste(folderSave , "/plot-test-fold-", f, ".pdf", sep="")
+    # pdf(name, width = 10, height = 8)
+    # print(plot(mldr.teste))
+    # dev.off()
+    # cat("\n")
+    # 
+    # name = paste(folderSave , "/plot-val-fold-", f, ".pdf", sep="")
+    # pdf(name, width = 10, height = 8)
+    # print(plot(mldr.val))
+    # dev.off()
+    # cat("\n")
+    # 
+    # name = paste(folderSave , "/plot-tv-fold-", f, ".pdf", sep="")
+    # pdf(name, width = 10, height = 8)
+    # print(plot(mldr.tv))
+    # dev.off()
+    # cat("\n")
     
     
     f = f + 1

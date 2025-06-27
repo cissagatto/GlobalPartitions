@@ -199,7 +199,8 @@ execute.global.python <- function(parameters){
                         nome.tr.csv, " ",
                         nome.vl.csv,  " ",
                         nome.ts.csv, " ", 
-                        start = as.numeric(parameters$Dataset.Info$LabelStart), " ",                         FolderSplit, " ", 
+                        start = as.numeric(parameters$Dataset.Info$AttEnd), " ",
+                        FolderSplit, " ", 
                         fold = f,
                         sep="")
     
@@ -437,7 +438,7 @@ gather.eval.python.silho <- function(parameters){
   setwd(parameters$Directories$FolderGlobal)
   final.results <- final.results[, !duplicated(colnames(final.results))]
   final.results = final.results[,-1]
-  write.csv(final.results, "performance.csv", row.names = FALSE)
+  write.csv(final.results, "performance.csv")
   
   write.csv(total.model.size, "model-size.csv", row.names = FALSE)
   write.csv(final.runtime.r, "runtime-r.csv", row.names = FALSE)
