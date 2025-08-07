@@ -91,7 +91,7 @@ args <- commandArgs(TRUE)
 config_file <- args[1]
 
 
-# config_file = "~/GlobalPartitions/config-files/gr-emotions-1.csv"
+# config_file = "~/GlobalPartitions/config-files/gr-GpositiveGO-1.csv"
 
 # /home/cissagatto/Documentos/GlobalPartitions/config-files/rf
 
@@ -249,7 +249,7 @@ if(implementation=="clus"){
   cat("\n# RSCRIPT DELETE                                   #")
   cat("\n####################################################\n\n")
   str5 = paste("rm -r ", parameters$Directories$FolderDataset, sep="")
-  print(system(str5))
+  system(str5)
   
 } else if(implementation=="rf"){
   
@@ -273,7 +273,7 @@ if(implementation=="clus"){
   cat("\n# RSCRIPT DELETE                                  #")
   cat("\n###################################################\n\n")
   str5 = paste("rm -r ", parameters$Directories$FolderDataset, sep="")
-  print(system(str5))
+  system(str5)
   
   
   cat("\n\n###################################################################")
@@ -303,7 +303,7 @@ if(implementation=="clus"){
                  "-results-global.tar.gz", sep="")
   
   str_04 = paste("cp ", str_03, " ", str_0, sep="")
-  print(system(str_04))
+  system(str_04)
   
   
   # cat("\n\n######################################################")
@@ -350,7 +350,7 @@ cat("\n# CLEAN                                               #")
 cat("\n#######################################################\n\n")
 cat("\nDelete folder \n")
 str5 = paste("rm -r ", parameters$Directories$FolderResults, sep="")
-print(system(str5))
+system(str5)
 
 
 cat("\n\n################################################################")

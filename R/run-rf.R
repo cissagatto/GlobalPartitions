@@ -75,7 +75,7 @@ run.rf <- function(parameters){
     
     cl <- parallel::makeCluster(parameters$Config.File$Number.Cores)
     doParallel::registerDoParallel(cl)
-    print(cl)
+    #print(cl)
     
     if(parameters$Config.File$Number.Cores==1){
       cat("\n\n########################################################")

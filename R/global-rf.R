@@ -207,7 +207,7 @@ execute.global.python <- function(parameters){
     
     # EXECUTA
     start <- proc.time()
-    res = print(system(str.execute))
+    res = system(str.execute)
     tempo = data.matrix((proc.time() - start))
     tempo = data.frame(t(tempo))
     write.csv(tempo, paste(FolderSplit, "/runtime-fold.csv", sep=""))
@@ -382,7 +382,7 @@ gather.eval.python.silho <- function(parameters){
     cat("\nFold: ", f)
     
     #########################################################################
-    folderSplit = paste(parameters$Directories$FolderGlobal,
+    folderSplit = paste(parameters$Directories$FolderGlobal ,
                         "/Split-", f, sep="")
     
     #########################################################################
@@ -403,7 +403,7 @@ gather.eval.python.silho <- function(parameters){
     res.model.size = data.frame(read.csv(paste(folderSplit, 
                                                "/model-size.csv", sep="")))
     names(res.model.size) = "Bytes"
-    resultado = data.frame(fold = paste0("fold",f), res.model.size)
+    resultado = data.frame(fold = f, res.model.size)
     total.model.size = rbind(total.model.size, resultado)
     
     #########################################################################
@@ -420,23 +420,24 @@ gather.eval.python.silho <- function(parameters){
     res.runtime.python = data.frame(fold = paste0("fold",f), res.runtime.python)
     final.runtime.p = rbind(final.runtime.p, res.runtime.python)
     
+    
     #################################
     # /tmp/gr-emotions/Global/Split-1
-    print(system(paste0("rm -r ", folderSplit, "/results-python.csv", sep="")))
-    print(system(paste0("rm -r ", folderSplit, "/results-utiml.csv", sep="")))
-    print(system(paste0("rm -r ", folderSplit, "/model-size.csv", sep="")))
-    print(system(paste0("rm -r ", folderSplit, "/runtime-python.csv", sep="")))
-    print(system(paste0("rm -r ", folderSplit, "/runtime-fold.csv", sep="")))
+    system(paste0("rm -r ", folderSplit, "/results-python.csv", sep=""))
+    system(paste0("rm -r ", folderSplit, "/results-utiml.csv", sep=""))
+    system(paste0("rm -r ", folderSplit, "/model-size.csv", sep=""))
+    system(paste0("rm -r ", folderSplit, "/runtime-python.csv", sep=""))
+    system(paste0("rm -r ", folderSplit, "/runtime-fold.csv", sep=""))
     
     f = f + 1
     gc()
   } 
   
   
-  setwd(parameters$Directories$FolderGlobal)
+  setwd(parameters$Directories$FolderLocal)
   final.results <- final.results[, !duplicated(colnames(final.results))]
   final.results = final.results[,-1]
-  write.csv(final.results, "performance.csv")
+  write.csv(final.results, "performance.csv", row.names = FALSE)
   
   write.csv(total.model.size, "model-size.csv", row.names = FALSE)
   write.csv(final.runtime.r, "runtime-r.csv", row.names = FALSE)
@@ -448,6 +449,8 @@ gather.eval.python.silho <- function(parameters){
   cat("\n########################################################")
   cat("\n\n\n\n")
 }
+
+
 
 ###############################################################################
 # Please, any errors, contact us: elainececiliagatto@gmail.com                #
