@@ -68,8 +68,11 @@ if(dir.exists(FolderCF)==FALSE){dir.create(FolderCF)}
 ###############################################################################
 # QUAL Implementation USAR
 ###############################################################################
-Implementation.1 = c("rf", "clus", "utiml", "mulan")
-Implementation.2 = c("r", "c", "u", "m")
+#Implementation.1 = c("rf", "clus", "utiml", "mulan")
+#Implementation.2 = c("r", "c", "u", "m")
+
+Implementation.1 = c("rf")
+Implementation.2 = c("r")
 
 
 ###############################################################################

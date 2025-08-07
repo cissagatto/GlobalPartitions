@@ -50,6 +50,8 @@ rm(list=ls())
 
 #getwd()
 
+
+
 cat("\n################################")
 cat("\n# Set Work Space               #")
 cat("\n###############################\n\n")
@@ -89,7 +91,7 @@ args <- commandArgs(TRUE)
 config_file <- args[1]
 
 
-# config_file = "~/GlobalPartitions/config-files/gr-flags.csv"
+# config_file = "~/GlobalPartitions/config-files/gr-emotions-1.csv"
 
 # /home/cissagatto/Documentos/GlobalPartitions/config-files/rf
 

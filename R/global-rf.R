@@ -135,8 +135,7 @@ gather.files.python <- function(parameters){
 ##############################################################################
 execute.global.python <- function(parameters){
   
-  f = 2
-
+  # f = 1
   RfGlobalParalel <- foreach(f = 1:parameters$Config.File$Number.Folds) %dopar%{
   # while(f<=parameters$Config.File$Number.Folds){
     
@@ -292,13 +291,13 @@ evaluate.global.python <- function(parameters){
     #####################################################################
     nome.true = paste(FolderSplit, "/y_true.csv", sep="")
     nome.pred.proba = paste(FolderSplit, "/y_pred_proba.csv", sep="")
-    nome.pred.bin = paste(FolderSplit, "/y_pred_bin.csv", sep="")
+    #nome.pred.bin = paste(FolderSplit, "/y_pred_bin.csv", sep="")
     
     
     #####################################################################
     y_true = data.frame(read.csv(nome.true))
     y_pred_proba = data.frame(read.csv(nome.pred.proba))
-    y_pred_bin = data.frame(read.csv(nome.pred.bin))
+    # y_pred_bin = data.frame(read.csv(nome.pred.bin))
     
     
     ##########################################################################
@@ -306,7 +305,7 @@ evaluate.global.python <- function(parameters){
     y.true.3 = mldr_from_dataframe(y.true.2, 
                                    labelIndices = seq(1,ncol(y.true.2)), 
                                    name = "y.true.2")
-    y_pred_bin = sapply(y_pred_bin, function(x) as.numeric(as.character(x)))
+    #y_pred_bin = sapply(y_pred_bin, function(x) as.numeric(as.character(x)))
     y_pred_proba = sapply(y_pred_proba, function(x) as.numeric(as.character(x)))
     
     
@@ -324,7 +323,6 @@ evaluate.global.python <- function(parameters){
     write.csv(y_threshold_card, 
               paste(FolderSplit, "/y_pred_thrLC.csv", sep=""),
               row.names = FALSE)
-    
     
     ##########################################################################    
     avaliacao(f = f, y_true = y.true.3, y_pred = y_pred_proba,
@@ -403,8 +401,8 @@ gather.eval.python.silho <- function(parameters){
     
     #########################################################################
     res.model.size = data.frame(read.csv(paste(folderSplit, 
-                                               "/model-sizes.csv", sep="")))
-    names(res.model.size) = c("Format", "Bytes")
+                                               "/model-size.csv", sep="")))
+    names(res.model.size) = "Bytes"
     resultado = data.frame(fold = paste0("fold",f), res.model.size)
     total.model.size = rbind(total.model.size, resultado)
     
@@ -418,7 +416,7 @@ gather.eval.python.silho <- function(parameters){
     #########################################################################
     res.runtime.python = data.frame(read.csv(paste(folderSplit, 
                                                    "/runtime-python.csv", sep="")))
-    names(res.runtime.python) = c("Process", "Time")
+    names(res.runtime.python) = c("Train", "Test")
     res.runtime.python = data.frame(fold = paste0("fold",f), res.runtime.python)
     final.runtime.p = rbind(final.runtime.p, res.runtime.python)
     
@@ -426,7 +424,7 @@ gather.eval.python.silho <- function(parameters){
     # /tmp/gr-emotions/Global/Split-1
     print(system(paste0("rm -r ", folderSplit, "/results-python.csv", sep="")))
     print(system(paste0("rm -r ", folderSplit, "/results-utiml.csv", sep="")))
-    print(system(paste0("rm -r ", folderSplit, "/model-sizes.csv", sep="")))
+    print(system(paste0("rm -r ", folderSplit, "/model-size.csv", sep="")))
     print(system(paste0("rm -r ", folderSplit, "/runtime-python.csv", sep="")))
     print(system(paste0("rm -r ", folderSplit, "/runtime-fold.csv", sep="")))
     

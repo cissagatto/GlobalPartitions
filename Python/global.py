@@ -74,18 +74,19 @@ if __name__ == '__main__':
     fold = sys.argv[6]             # directory to save predictions
 
     # Example (for local testing)
-    # train = pd.read_csv("/home/cissagatto/Global/data/emotions-Split-Tr-1.csv")
-    # test = pd.read_csv("/home/cissagatto/Global/data/emotions-Split-Ts-1.csv")
-    # valid = pd.read_csv("/home/cissagatto/Global/data/emotions-Split-Vl-1.csv")
+    # train = pd.read_csv("/tmp/gr-emotions/Global/Split-1/emotions-Split-Tr-1.csv")
+    # test = pd.read_csv("/tmp/gr-emotions/Global/Split-1/emotions-Split-Ts-1.csv")
+    # valid = pd.read_csv("/tmp/gr-emotions/Global/Split-1/emotions-Split-Vl-1.csv")
     # start = 72
-    # directory = "/home/cissagatto/Global"
+    # directory = "/tmp/gr-emotions/Global/Split-1"
+    # fold = 1
 
     print("\n\n%==============================================%")
-    print("label train: ", sys.argv[1])
-    print("label valid: ", sys.argv[2])
-    print("label test: ", sys.argv[3])
-    print("label start: ", sys.argv[4])
-    print("directory: ", sys.argv[5])
+    #print("label train: ", sys.argv[1])
+    #print("label valid: ", sys.argv[2])
+    #print("label test: ", sys.argv[3])
+    #print("label start: ", sys.argv[4])
+    #print("directory: ", sys.argv[5])
     print("fold: ", sys.argv[6])
     print("%==============================================%\n\n")
      
@@ -102,15 +103,13 @@ if __name__ == '__main__':
     
     # Get label and attribute names
     labels_y_train = list(Y_train.columns)
-    labels_y_test = list(Y_test.columns)
+    labels_y_test = list(Y_test.columns)    
     attr_x_train = list(X_train.columns)
     attr_x_test = list(X_test.columns)
     
     # Classifier parameters
     random_state = 1234    
-    n_estimators = 200
-
-    # Initialize classifier
+    n_estimators = 200    
     rf = RandomForestClassifier(n_estimators=n_estimators, random_state=random_state)
         
     start_train_time = time.time() # Measure training time
@@ -118,80 +117,43 @@ if __name__ == '__main__':
     end_train_time = time.time()
     training_time = end_train_time - start_train_time  
     
-    start_test_time = time.time() # Measure prediction time (binary predictions)
-    y_pred_bin = pd.DataFrame(rf.predict(X_test)) # Binary predictions
-    y_pred_bin.columns = labels_y_test
-    end_test_time = time.time()
-    testing_time_bin = end_test_time - start_test_time
+    # setando nome do diretorio e arquivo para salvar
+    true = (directory + "/y_true.csv")     
+    pred = (directory + "/y_pred_bin.csv") 
+    proba = (directory + "/y_pred_proba.csv")  
+    proba_original = (directory + "/proba_original.csv")  
 
-    start_test_time = time.time() # Measure prediction time (binary predictions)
-    y_pred_proba = rf.predict_proba(X_test) # Probabilistic predictions
-    end_test_time = time.time()
-    testing_time_proba = end_test_time - start_test_time
+    # predições probabilísticas
+    start_time_test_proba = time.time()
+    probabilities = eval.safe_predict_proba(rf, X_test, Y_train)
+    end_time_test_proba = time.time()
+    test_duration_proba = end_time_test_proba - start_time_test_proba
+    probabilities.to_csv(proba, index=False)
 
-    # Prepare dataframe
-    timing_data = [
-        ["training_time", training_time],
-        ["testing_time_bin", testing_time_bin],
-        ["testing_time_proba", testing_time_proba]
-    ]
+    Y_test.to_csv(true, index=False)
 
-    df_timing = pd.DataFrame(timing_data, columns=["Process", "Time (s)"])
-
-    # Save to CSV
-    name_csv = os.path.join(directory, "runtime-python.csv")
-    df_timing.to_csv(name_csv, index=False)   
+    times_df = pd.DataFrame({
+        'train_duration': [training_time],
+        'test_duration_proba': [test_duration_proba],
+        #'test_duration_bin': [test_duration_bin]
+    })
+    times_path = os.path.join(directory, "runtime-python.csv")
+    times_df.to_csv(times_path, index=False)
     
 
-    # Measure pickle size in memory
-    buffer_pickle = io.BytesIO()
-    pickle.dump(rf, buffer_pickle)
-    size_pickle_bytes = buffer_pickle.tell()
-
-    # Measure joblib size in memory
-    buffer_joblib = io.BytesIO()
-    joblib.dump(rf, buffer_joblib)
-    size_joblib_bytes = buffer_joblib.tell()
-
-    # Prepare dataframe with only bytes
-    model_sizes = [
-        ["pickle", size_pickle_bytes],
-        ["joblib", size_joblib_bytes]
-    ]
-
-    df_sizes = pd.DataFrame(model_sizes, columns=["Format", "Size (Bytes)"])
-
-    # Save to CSV
-    name_csv = os.path.join(directory, "model-sizes.csv")
-    df_sizes.to_csv(name_csv, index=False)
-    
-    # Set output file paths
-    name_true = os.path.join(directory, "y_true.csv")
-    name_pred_bin = os.path.join(directory, "y_pred_bin.csv")    
-    name_pred_proba = os.path.join(directory, "y_pred_proba.csv")
-    name_pred_proba_original = os.path.join(directory, "proba_original.csv")
-    
-    # Save true labels and binary predictions
-    y_pred_bin.to_csv(name_pred_bin, index=False)
-    Y_test.to_csv(name_true, index=False)    
-    
-    # Save probabilistic predictions
-    ldf1 = []
-    for n in range(0, len(y_pred_proba)):
-        res = y_pred_proba[n]
-        res1 = pd.DataFrame(res)
-        res1.columns = [f'prob_{n}_0', f'prob_{n}_1']
-        ldf1.append(res1)      
-    
-    final = pd.concat(ldf1, axis=1)
-    final.to_csv(name_pred_proba_original, index=False)    
-
-    # Seleciona apenas as colunas cujo nome termina com '_1'
-    final_1 = final.loc[:, final.columns.str.endswith('_1')]
-    final_1.columns = labels_y_test
-    final_1.to_csv(name_pred_proba, index=False)    
-
-    # print("\nCOMPUTE CURVES")
-    res_curves = eval.multilabel_curve_metrics(Y_test, final_1)    
+    # =========== SAVE MEASURES ===========   
+    metrics_df, ignored_df = eval.multilabel_curve_metrics(Y_test, probabilities)    
     name = (directory + "/results-python.csv") 
-    res_curves.to_csv(name, index=False)
+    metrics_df.to_csv(name, index=False)  
+    name = (directory + "/ignored-classes.csv") 
+    ignored_df.to_csv(name, index=False)  
+     
+
+    # =========== SAVE MODEL SIZE EM BYTES ===========
+    model_buffer = io.BytesIO()
+    pickle.dump(rf, model_buffer)
+    model_size_bytes = model_buffer.tell()
+    model_size_df = pd.DataFrame({
+        'model_size_bytes': [model_size_bytes]
+    })
+    model_size_df.to_csv(os.path.join(directory, "model-size.csv"), index=False)
