@@ -434,7 +434,7 @@ gather.eval.python.silho <- function(parameters){
   } 
   
   
-  setwd(parameters$Directories$FolderLocal)
+  setwd(parameters$Directories$FolderGlobal)
   final.results <- final.results[, !duplicated(colnames(final.results))]
   final.results = final.results[,-1]
   write.csv(final.results, "performance.csv", row.names = FALSE)
