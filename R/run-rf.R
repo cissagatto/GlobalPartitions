@@ -66,10 +66,10 @@ run.rf <- function(parameters){
   
   if(parameters$Config.File$Number.Cores == 0){
     
-    cat("\n\n##########################################################")
-    cat("\n# Zero is a disallowed value for number_cores. Please      #")
-    cat("\n# choose a value greater than or equal to 1.               #")
-    cat("\n############################################################\n\n")
+    cat("\n\n#############################################################")
+       cat("\n# Zero is a disallowed value for number_cores. Please      #")
+       cat("\n# choose a value greater than or equal to 1.               #")
+       cat("\n############################################################\n\n")
     
   } else {
     
@@ -79,12 +79,12 @@ run.rf <- function(parameters){
     
     if(parameters$Config.File$Number.Cores==1){
       cat("\n\n########################################################")
-      cat("\n# Running Sequentially!                                #")
-      cat("\n########################################################\n\n")
+        cat("\n# Running Sequentially!                                #")
+        cat("\n########################################################\n\n")
     } else {
-      cat("\n\n############################################################")
-      cat("\n# Running in parallel with ", parameters$Config.File$Number.Cores, " cores! #")
-      cat("\n############################################################\n\n")
+      cat("\n\n##############################################################################")
+        cat("\n# Running in parallel with ", parameters$Config.File$Number.Cores, " cores!  #")
+        cat("\n##############################################################################\n\n")
     }
   }
   
@@ -105,15 +105,22 @@ run.rf <- function(parameters){
   parameters$Names.Labels = labels.names
   
   
+  ####################################################"
+  FolderG = paste(parameters$Directories$FolderResults, 
+                  "/Global2", sep="")
+  if(dir.exists(FolderG)==FALSE){dir.create(FolderG)}
+  parameters$Directories$FolderGlobal2 = FolderG
+  
+  
   cat("\n\n####################################################")
     cat("\n# RUN: Gather Files                                #")
     cat("\n####################################################\n\n")
   time.gather.files = system.time(gather.files.python(parameters))
   
   
-  cat("\n\n#################################################")
-  cat("\n# RUN: Properties                               #")
-  cat("\n#################################################\n\n")
+  # cat("\n\n#################################################")
+  #   cat("\n# RUN: Properties                               #")
+  #   cat("\n#################################################\n\n")
   # time.properties = system.time(properties.datasets(parameters))
   
   
@@ -124,24 +131,40 @@ run.rf <- function(parameters){
   
   
   cat("\n\n##########################################################")
-  cat("\n# RUN: Evaluate                                          #")
-  cat("\n##########################################################\n\n")
-  time.evaluate = system.time(evaluate.global.python(parameters))
+    cat("\n# RUN: Evaluate 1                                        #")
+    cat("\n##########################################################\n\n")
+  time.evaluate = system.time(evaluate.global.python(parameters,
+                                                     folder = parameters$Directories$FolderGlobal))
+  
+  
+  cat("\n\n########################################################")
+    cat("\n# RUN: Evaluate 2                                      #")
+    cat("\n########################################################\n\n")
+  time.evaluate2 = system.time(evaluate.global.python(parameters,
+                                                       folder = parameters$Directories$FolderGlobal2))
   
   
   cat("\n\n##########################################################")
-    cat("\n# RUN: Gather Evaluated Measures                         #")
+    cat("\n# RUN: Gather Evaluated Measures 1                       #")
     cat("\n##########################################################\n\n")
-  time.gather.evaluate = system.time(gather.eval.python.silho(parameters))
+  time.gather.evaluate.1 = system.time(gather.eval.python.silho(parameters, 
+                                                                folder = parameters$Directories$FolderGlobal))
   
   
-  cat("\n\n###########################################################")
-    cat("\n# RUN: Save Runtime                                       #")
-    cat("\n###########################################################\n\n")
-  RunTimeGlobal = rbind(time.gather.files, time.execute, time.evaluate, 
-                        time.gather.evaluate)
-  setwd(parameters$Directories$FolderGlobal)
-  write.csv(RunTimeGlobal, "Run-RunTime.csv")
+  cat("\n\n##########################################################")
+    cat("\n# RUN: Gather Evaluated Measures2                        #")
+    cat("\n##########################################################\n\n")
+  time.gather.evaluate = system.time(gather.eval.python.silho(parameters, 
+                                                              folder = parameters$Directories$FolderGlobal2))
+  
+  
+  #cat("\n\n###########################################################")
+  #  cat("\n# RUN: Save Runtime                                       #")
+  #  cat("\n###########################################################\n\n")
+  # RunTimeGlobal = rbind(time.gather.files, time.execute, time.evaluate, 
+  #                       time.gather.evaluate)
+  # setwd(parameters$Directories$FolderGlobal)
+  # write.csv(RunTimeGlobal, "Run-RunTime.csv")
   
   
   cat("\n\n###########################################################")

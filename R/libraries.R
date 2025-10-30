@@ -45,8 +45,9 @@
 ###############################################################################
 library(here)
 library(stringr)
-FolderRoot <- here::here()
-FolderScripts <- here::here("R")
+setwd("~/GlobalPartitions")
+#FolderRoot <- here::here()
+#FolderScripts <- here::here("R")
 
 
 

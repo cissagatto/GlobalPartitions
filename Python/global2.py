@@ -85,14 +85,14 @@ if __name__ == '__main__':
     fold = 1
     """
 
-    print("\n\n%==============================================%")
-    print("train: ", sys.argv[1])
-    print("valid: ", sys.argv[2])
-    print("test: ", sys.argv[3])
-    print("start: ", sys.argv[4])
-    print("directory: ", sys.argv[5])
-    print("fold: ", sys.argv[6])
-    print("%==============================================%\n\n")
+    #print("\n\n%==============================================%")
+    #print("label train: ", sys.argv[1])
+    #print("label valid: ", sys.argv[2])
+    #print("label test: ", sys.argv[3])
+    #print("label start: ", sys.argv[4])
+    #print("directory: ", sys.argv[5])
+    #print("fold: ", sys.argv[6])
+    #print("%==============================================%\n\n")
      
     # Merge train and validation sets
     train = pd.concat([train, valid], axis=0).reset_index(drop=True)
@@ -115,14 +115,12 @@ if __name__ == '__main__':
     random_state = 1234    
     n_estimators = 200    
     rf = RandomForestClassifier(n_estimators=n_estimators, random_state=random_state)
-
         
     # ======= TREINO =======
     start_train_time = time.time()
     rf.fit(X_train, Y_train)
     end_train_time = time.time()
-    training = end_train_time - start_train_time
-
+    training = end_train_time - start_train_time  
 
     # ======= PREDIÇÃO BINÁRIA =======
     start_test_time = time.time()
@@ -131,13 +129,11 @@ if __name__ == '__main__':
     end_test_time = time.time()
     testing_bin = end_test_time - start_test_time
 
-
     # ======= PREDIÇÃO DE PROBABILIDADES =======
     start_test_time = time.time()        
     probas_list = rf.predict_proba(X_test)
     end_test_time = time.time()
     testing_proba = end_test_time - start_test_time
-
 
     # ======= PEGANDO APENAS A PROBABILIDADE DE PERTENCER =======        
     # empilha as colunas de probabilidade de pertencer (classe 1)
@@ -145,6 +141,12 @@ if __name__ == '__main__':
     # converte em dataframe
     probabilities_df = pd.DataFrame(probabilities, columns=labels_y_test)
 
+    # predições probabilísticas
+    #start_time_test_proba = time.time()
+    #probabilities = eval.safe_predict_proba(rf, X_test, Y_train)
+    #end_time_test_proba = time.time()
+    #test_duration_proba = end_time_test_proba - start_time_test_proba
+    #probabilities.to_csv(proba, index=False)
 
     # ======= CONVERTENDO TODAS AS PREDIÇÕES =======    
     columns = []
@@ -167,7 +169,9 @@ if __name__ == '__main__':
     binary = os.path.join(directory, "y_pred_bin.csv")
     proba = os.path.join(directory, "y_pred_proba.csv")
     original = os.path.join(directory, "y_proba_original.csv")
-    test[labels_y_test].to_csv(true, index=False)    
+
+    test[labels_y_test].to_csv(true, index=False)
+    
     probabilities_df.to_csv(proba, index=False)
     binary_df.to_csv(binary, index=False)
     probas_df.to_csv(original, index=False)
@@ -184,15 +188,11 @@ if __name__ == '__main__':
 
 
     # =========== SAVE MEASURES ===========   
-    metrics_df = eval.multilabel_curves_measures(Y_test, pd.DataFrame(probabilities, columns=labels_y_test))
-    metrics_df.to_csv(os.path.join(directory, "results-python.csv"), index=False)        
-    
-    # metrics_df, ignored_df = eval.multilabel_curve_metrics(Y_test, probabilities_df)        
-    # name = (directory + "/results-python.csv") 
-    # metrics_df.to_csv(name, index=False)      
-    # name = (directory + "/ignored-classes.csv") 
-    # ignored_df.to_csv(name, index=False)    
-       
+    metrics_df, ignored_df = eval.multilabel_curve_metrics(Y_test, probabilities_df)        
+    name = (directory + "/results-python.csv") 
+    metrics_df.to_csv(name, index=False)      
+    name = (directory + "/ignored-classes.csv") 
+    ignored_df.to_csv(name, index=False)       
 
     # ======= SAVE MODEL SIZE =======
     model_buffer = io.BytesIO()

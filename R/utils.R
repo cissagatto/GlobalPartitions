@@ -54,8 +54,48 @@
 
 
 ###############################################################################
-#
-###############################################################################
+#' Convert CSV files to ARFF format using a Java converter
+#'
+#' @description
+#' This function calls a Java JAR file (`R_csv_2_arff.jar`) to convert a CSV dataset
+#' into an ARFF file format (used by Weka and other machine learning tools).
+#' It builds the system command dynamically and executes it from within R.
+#'
+#' @details
+#' The function assumes that the Java JAR converter (`R_csv_2_arff.jar`) is located
+#' in the folder specified by `FolderUtils`. The user must have Java properly installed
+#' and accessible through the system PATH.
+#'
+#' @param arg1 Character. The path to the input CSV file to be converted.
+#' @param arg2 Character. The path or name of the output ARFF file to be generated.
+#' @param arg3 Character. Additional parameters to be passed to the Java converter.
+#' @param FolderUtils Character. The directory containing the `R_csv_2_arff.jar` file.
+#'
+#' @return
+#' The function prints the result of the system command execution to the console.
+#' It does not return any R object (invisible return of `NULL`).
+#'
+#' @examples
+#' \dontrun{
+#' # Example usage:
+#' FolderUtils <- "/home/user/utils"
+#' input_csv <- "/home/user/data/sample.csv"
+#' output_arff <- "/home/user/data/sample.arff"
+#'
+#' converteArff(input_csv, output_arff, "", FolderUtils)
+#' }
+#'
+#' @author Elaine Cecília Gatto - Cissa
+#'
+#' @seealso
+#' [system()] for executing system commands in R,
+#' [paste()] for string concatenation.
+#'
+#' @note
+#' Make sure Java is installed and available in your system environment.
+#' The JAR file `R_csv_2_arff.jar` must exist in the specified `FolderUtils` directory.
+#'
+#' @export
 converteArff <- function(arg1, arg2, arg3, FolderUtils){  
   str = paste("java -jar ", FolderUtils,  "/R_csv_2_arff.jar ", 
               arg1, " ", arg2, " ", arg3, sep="")
@@ -64,9 +104,89 @@ converteArff <- function(arg1, arg2, arg3, FolderUtils){
 }
 
 
+
+
 ###############################################################################
-#
-###############################################################################
+#' Compute and export multilabel dataset properties for each fold
+#'
+#' @description
+#' This function calculates and exports detailed multilabel dataset properties,
+#' statistics, and distributions for each cross-validation fold (train, test, validation, and train+validation).
+#' It relies on the `mldr` package to extract multilabel measures and label information,
+#' saving multiple summary and diagnostic CSV files for analysis.
+#'
+#' @details
+#' The function processes each fold defined in `parameters$Config.File$Number.Folds` by:
+#' - Reading split files for training, testing, validation, and combined sets (train + validation).
+#' - Computing label-based statistics such as mean, standard deviation, quantiles, and positive/negative instance counts.
+#' - Extracting multilabel measures (e.g., label cardinality, density, imbalance ratio, etc.) using the `mldr` package.
+#' - Saving multiple CSV summaries per fold (summary statistics, label frequencies, labelsets, etc.).
+#' - Storing global property summaries across folds for all dataset partitions.
+#'
+#' Additionally, the function identifies labels with zero frequency across folds and reports them.
+#'
+#' @param parameters A list object containing all configuration and directory information required for processing.
+#' The expected structure includes:
+#' \itemize{
+#'   \item \code{parameters$Config.File$Number.Folds} – Number of cross-validation folds.
+#'   \item \code{parameters$Config.File$Dataset.Name} – Name of the dataset being processed.
+#'   \item \code{parameters$Directories$FolderResults} – Output directory for saving results.
+#'   \item \code{parameters$Directories$FolderCVTR}, \code{FolderCVTS}, \code{FolderCVVL} – Paths to training, testing, and validation split CSVs.
+#'   \item \code{parameters$Directories$FolderNamesLabels} – Path containing the dataset’s label names CSV file.
+#'   \item \code{parameters$Dataset.Info$LabelStart}, \code{parameters$Dataset.Info$LabelEnd} – Index range for label columns.
+#' }
+#'
+#' @return
+#' A data frame containing information about labels with zero frequency across folds.
+#' The function also writes multiple CSV files to disk:
+#' \itemize{
+#'   \item Per-fold summaries (e.g., `summary-train-<fold>.csv`, `summary-test-<fold>.csv`).
+#'   \item Label frequencies (`instances-pos-neg-<fold>.csv`, `labels-max-min-<fold>.csv`).
+#'   \item Labelsets distributions (`labelsets-train-<fold>.csv`, etc.).
+#'   \item Aggregated property summaries (`properties-train.csv`, `properties-test.csv`, etc.).
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' # Example usage
+#' library(mldr)
+#' 
+#' parameters <- list(
+#'   Config.File = list(
+#'     Number.Folds = 10,
+#'     Dataset.Name = "emotions"
+#'   ),
+#'   Directories = list(
+#'     FolderResults = "/home/user/results",
+#'     FolderCVTR = "/home/user/splits/train",
+#'     FolderCVTS = "/home/user/splits/test",
+#'     FolderCVVL = "/home/user/splits/val",
+#'     FolderNamesLabels = "/home/user/data"
+#'   ),
+#'   Dataset.Info = list(
+#'     LabelStart = 7,
+#'     LabelEnd = 12
+#'   )
+#' )
+#'
+#' properties.datasets(parameters)
+#' }
+#'
+#' @author Elaine Cecília Gatto - Cissa
+#'
+#' @seealso
+#' [mldr::mldr_from_dataframe()] for generating multilabel dataset objects,  
+#' [apply()] and [write.csv()] for computing and saving statistics.
+#'
+#' @note
+#' - The function assumes that all necessary split CSVs and label files exist in the provided directories.
+#' - The `mldr` package must be installed and loaded before running this function.
+#' - Folder paths are created automatically if missing.
+#'
+#' @import mldr
+#' @importFrom dplyr arrange desc
+#'
+#' @export
 properties.datasets <- function(parameters){
   
   fold = c(0)
@@ -363,51 +483,51 @@ properties.datasets <- function(parameters){
     name = paste(folderSave, "/labels-train-", f, ".csv", sep="")
     write.csv(labels.train, name)
     
-    if(any(labels.train$count == 0)) {
-      zero_counts <- labels.train[labels.train$count == 0, ]
-      zeros = rbind(zeros, zero_counts)
-      cat("\n\ntem zeros\n\n")
-    } else {
-      cat("\n\nnão tem zeros\n\n")
-    }
+    # if(any(labels.train$count == 0)) {
+    #   zero_counts <- labels.train[labels.train$count == 0, ]
+    #   zeros = rbind(zeros, zero_counts)
+    #   cat("\n\ntem zeros\n\n")
+    # } else {
+    #   cat("\n\nnão tem zeros\n\n")
+    # }
     
     labels.test = data.frame(mldr.teste$labels)
     name = paste(folderSave, "/labels-test-", f, ".csv", sep="")
     write.csv(labels.test, name)
     
-    if(any(labels.test$count == 0)) {
-      zero_counts <- labels.test[labels.test$count == 0, ]
-      zeros = rbind(zeros, zero_counts)
-      cat("\n\ntem zeros\n\n")
-    } else {
-      cat("\n\nnão tem zeros\n\n")
-    }
+    # if(any(labels.test$count == 0)) {
+    #   zero_counts <- labels.test[labels.test$count == 0, ]
+    #   zeros = rbind(zeros, zero_counts)
+    #   cat("\n\ntem zeros\n\n")
+    # } else {
+    #   cat("\n\nnão tem zeros\n\n")
+    # }
     
     
     labels.val = data.frame(mldr.val$labels)
     name = paste(folderSave, "/labels-val-", f, ".csv", sep="")
     write.csv(labels.val, name)
-    
-    if(any(labels.val$count == 0)) {
-      zero_counts <- labels.val[labels.val$count == 0, ]
-      zeros = rbind(zeros, zero_counts)
-      cat("\n\ntem zeros\n\n")
-    } else {
-      cat("\n\nnão tem zeros\n\n")
-    }
+     
+    # if(any(labels.val$count == 0)) {
+    #   zero_counts <- labels.val[labels.val$count == 0, ]
+    #   zeros = rbind(zeros, zero_counts)
+    #   cat("\n\ntem zeros\n\n")
+    # } else {
+    #   cat("\n\nnão tem zeros\n\n")
+    # }
     
     
     labels.tv = data.frame(mldr.tv$labels)
     name = paste(folderSave, "/labels-tv-", f, ".csv", sep="")
     write.csv(labels.tv, name)
     
-    if(any(labels.tv$count == 0)) {
-      zero_counts <- labels.tv[labels.tv$count == 0, ]
-      zeros = rbind(zeros, zero_counts)
-      cat("\n\nTEM ZEROS\n\n")
-    } else {
-      cat("\n\nnão tem zeros\n\n")
-    }
+    # if(any(labels.tv$count == 0)) {
+    #   zero_counts <- labels.tv[labels.tv$count == 0, ]
+    #   zeros = rbind(zeros, zero_counts)
+    #   cat("\n\nTEM ZEROS\n\n")
+    # } else {
+    #   cat("\n\nnão tem zeros\n\n")
+    # }
     
     
     ##########################################################################  
@@ -445,19 +565,19 @@ properties.datasets <- function(parameters){
     # print(plot(mldr.treino))
     # dev.off()
     # cat("\n")
-    #  
+      
     # name = paste(folderSave , "/plot-test-fold-", f, ".pdf", sep="")
     # pdf(name, width = 10, height = 8)
     # print(plot(mldr.teste))
     # dev.off()
     # cat("\n")
-    # 
+     
     # name = paste(folderSave , "/plot-val-fold-", f, ".pdf", sep="")
     # pdf(name, width = 10, height = 8)
     # print(plot(mldr.val))
     # dev.off()
     # cat("\n")
-    # 
+     
     # name = paste(folderSave , "/plot-tv-fold-", f, ".pdf", sep="")
     # pdf(name, width = 10, height = 8)
     # print(plot(mldr.tv))
@@ -469,7 +589,7 @@ properties.datasets <- function(parameters){
     gc()
   }
   
-  zeros
+  #zeros
   
   name = paste0(parameters$Directories$FolderResults, 
                 "/Properties/properties-tv.csv")
@@ -492,8 +612,74 @@ properties.datasets <- function(parameters){
 
 
 ###############################################################################
-#
-###############################################################################
+#' Create and manage the main directory structure for an experiment
+#'
+#' @description
+#' This function sets up and verifies all necessary directories for an experiment,
+#' based on configuration parameters provided in the `parameters` list.
+#' It creates folders for results, reports, scripts, datasets, cross-validation splits,
+#' label space, and other utilities.  
+#' The function ensures that all folders exist and returns their paths in a structured list.
+#'
+#' @details
+#' The folder structure is designed to support experiments involving data preprocessing,
+#' model training, validation, and result storage.  
+#' It includes subfolders such as:
+#' - **Global**: global results
+#' - **Dataset**: dataset
+#' - **CrossValidation (Tr, Ts, Vl)**: training, testing, and validation folds
+#' - **LabelSpace** and **NamesLabels**: label metadata and mappings
+#'
+#' The function automatically creates any folder that does not exist, ensuring that
+#' subsequent processes have the required directory organization.
+#'
+#' @param parameters A list containing configuration information, including:
+#'   - `Config.File$Folder.Results`: Path where results will be stored.
+#'   - `dataset_name`: Name of the dataset used.
+#'   - Other paths and variables defined in the experiment setup.
+#'
+#' @return
+#' A list containing the paths of all created or verified folders:
+#' \itemize{
+#'   \item `FolderResults` – Main folder for storing experiment results.
+#'   \item `FolderScripts` – Directory containing R scripts.
+#'   \item `FolderReports` – Folder for generated reports.
+#'   \item `FolderUtils` – Folder for utility scripts or JAR files.
+#'   \item `FolderPython` – Directory for Python-related files.
+#'   \item `FolderGlobal` – Folder for global experiment results.
+#'   \item `FolderDataset` – Dataset folder.
+#'   \item `FolderDatasetX` – Dataset-specific folder.
+#'   \item `FolderCV`, `FolderCVTR`, `FolderCVTS`, `FolderCVVL` – Cross-validation folders.
+#'   \item `FolderLabelSpace` – Folder for label space representations.
+#'   \item `FolderNamesLabels` – Folder containing label name mappings.
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' parameters <- list(
+#'   Config.File = list(Folder.Results = "/tmp/results"),
+#'   dataset_name = "example_dataset"
+#' )
+#' dirs <- directories(parameters)
+#'
+#' # Access one of the returned folders:
+#' dirs$FolderResults
+#' }
+#'
+#' @author Elaine Cecília Gatto - Cissa
+#'
+#' @seealso
+#' [dir.create()] and [dir.exists()] for folder management,
+#' [setwd()] for setting working directories.
+#'
+#' @note
+#' - All paths are constructed relative to `FolderRoot`, which should be
+#'   defined in the global environment before calling this function.
+#' - The function assumes that `dataset_name` and `folderResults`
+#'   variables are already set and valid.
+#' - Existing folders are not overwritten; only missing ones are created.
+#'
+#' @export
 directories <- function(parameters){
   
   #library(here)
@@ -751,8 +937,60 @@ directories <- function(parameters){
 
 
 ##############################################################################
-# 
-##############################################################################
+#' Extract dataset metadata into a structured list
+#'
+#' @description
+#' This function organizes and extracts key information from a dataset object
+#' into a structured list containing descriptive statistics and metadata fields.
+#' It is primarily used to standardize dataset information for later processing
+#' in multilabel learning experiments.
+#'
+#' @param dataset A list or data structure containing metadata and statistics
+#' for a given dataset. It must include named elements such as:
+#' `ID`, `Name`, `Instances`, `Inputs`, `Labels`, `LabelsSets`, `Single`,
+#' `MaxFreq`, `Card`, `Dens`, `Mean`, `Scumble`, `TCS`, `AttStart`, `AttEnd`,
+#' `LabelStart`, and `LabelEnd`.
+#'
+#' @return
+#' A list containing the extracted information from the input dataset, with
+#' fields for identification, size, label statistics, and structural boundaries.
+#'
+#' The returned list includes:
+#' \itemize{
+#'   \item \code{id} — Dataset identifier.
+#'   \item \code{name} — Dataset name.
+#'   \item \code{instances} — Number of instances.
+#'   \item \code{inputs} — Number of input features.
+#'   \item \code{labels} — Number of output labels.
+#'   \item \code{LabelsSets} — Label set definitions.
+#'   \item \code{single} — Indicator for single-label datasets.
+#'   \item \code{maxfreq} — Maximum label frequency.
+#'   \item \code{card}, \code{dens}, \code{mean}, \code{scumble}, \code{tcs} — Statistical measures.
+#'   \item \code{attStart}, \code{attEnd} — Input attribute index range.
+#'   \item \code{labStart}, \code{labEnd} — Label attribute index range.
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' dataset <- list(
+#'   ID = 1, Name = "Example", Instances = 100, Inputs = 10, Labels = 3,
+#'   LabelsSets = list(c(1, 0, 1)), Single = FALSE, MaxFreq = 0.6,
+#'   Card = 1.2, Dens = 0.4, Mean = 0.5, Scumble = 0.1, TCS = 0.9,
+#'   AttStart = 1, AttEnd = 10, LabelStart = 11, LabelEnd = 13
+#' )
+#' info <- infoDataSet(dataset)
+#' print(info$name)
+#' }
+#'
+#' @author Elaine Cecília Gatto - Cissa
+#'
+#' @seealso
+#' Functions that organize and preprocess multilabel datasets.
+#'
+#' @note
+#' The input `dataset` structure must contain all required fields with consistent naming.
+#'
+#' @export
 infoDataSet <- function(dataset){
   retorno = list()
   retorno$id = dataset$ID
@@ -777,107 +1015,65 @@ infoDataSet <- function(dataset){
 }
 
 
-##############################################################################
-# 
-##############################################################################
-roc.curva <- function(f, y_pred, test, Folder, nome){
-  
-  #####################################################################
-  y_pred= sapply(y_pred, function(x) as.numeric(as.character(x)))
-  res = mldr_evaluate(test, y_pred)
-  
-  ###############################################################
-  # PLOTANDO ROC CURVE
-  # name = paste(Folder, "/", nome, "-roc.pdf", sep="")
-  # pdf(name, width = 10, height = 8)
-  # print(plot(res$roc, print.thres = 'best', print.auc=TRUE, 
-  #            print.thres.cex=0.7, grid = TRUE, identity=TRUE,
-  #            axes = TRUE, legacy.axes = TRUE, 
-  #            identity.col = "#a91e0e", col = "#1161d5",
-  #            main = paste("fold ", f, " ", nome, sep="")))
-  # dev.off()
-  # cat("\n")
-  
-  ###############################################################
-  write.csv(as.numeric(res$roc$auc), paste(Folder, "/", nome, "-roc-auc.csv", sep=""))
-  write.csv(as.numeric(res$macro_auc), paste(Folder, "/", nome, "-roc-auc-macro.csv", sep=""))
-  write.csv(as.numeric(res$micro_auc), paste(Folder, "/", nome, "-roc-auc-micro.csv", sep=""))
-  
-  
-  ###############################################################
-  # SALVANDO AS INFORMAÇÕES DO ROC SEPARADAMENTE
-  name = paste(Folder, "/", nome, "-roc-1.txt", sep="")
-  output.file <- file(name, "wb")
-  
-  write(" ", file = output.file, append = TRUE)
-  write("percent: ", file = output.file, append = TRUE)
-  write(res$roc$percent, file = output.file, append = TRUE)
-  
-  write(" ", file = output.file, append = TRUE)
-  write("sensitivities: ", file = output.file, append = TRUE)
-  write(res$roc$sensitivities, file = output.file, append = TRUE)
-  
-  write(" ", file = output.file, append = TRUE)
-  write("specificities: ", file = output.file, append = TRUE)
-  write(res$roc$specificities, file = output.file, append = TRUE)
-  
-  write(" ", file = output.file, append = TRUE)
-  write("thresholds: ", file = output.file, append = TRUE)
-  write(res$roc$thresholds, file = output.file, append = TRUE)
-  
-  write(" ", file = output.file, append = TRUE)
-  write("direction: ", file = output.file, append = TRUE)
-  write(res$roc$direction, file = output.file, append = TRUE)
-  
-  write(" ", file = output.file, append = TRUE)
-  write("cases: ", file = output.file, append = TRUE)
-  write(res$roc$cases, file = output.file, append = TRUE)
-  
-  write(" ", file = output.file, append = TRUE)
-  write("controls: ", file = output.file, append = TRUE)
-  write(res$roc$controls, file = output.file, append = TRUE)
-  
-  write(" ", file = output.file, append = TRUE)
-  write("auc: ", file = output.file, append = TRUE)
-  write(res$roc$auc, file = output.file, append = TRUE)
-  
-  write(" ", file = output.file, append = TRUE)
-  write("original predictor: ", file = output.file, append = TRUE)
-  write(res$roc$original.predictor, file = output.file, append = TRUE)
-  
-  write(" ", file = output.file, append = TRUE)
-  write("original response: ", file = output.file, append = TRUE)
-  write(res$roc$original.response, file = output.file, append = TRUE)
-  
-  write(" ", file = output.file, append = TRUE)
-  write("predictor: ", file = output.file, append = TRUE)
-  write(res$roc$predictor, file = output.file, append = TRUE)
-  
-  write(" ", file = output.file, append = TRUE)
-  write("response: ", file = output.file, append = TRUE)
-  write(res$roc$response, file = output.file, append = TRUE)
-  
-  write(" ", file = output.file, append = TRUE)
-  write("levels: ", file = output.file, append = TRUE)
-  write(res$roc$levels, file = output.file, append = TRUE)
-  
-  close(output.file)
-  
-  ###############################################################
-  # SALVANDO AS OUTRAS INFORMAÇÕES
-  name = paste(Folder, "/", nome, "-roc-2.txt", sep="")
-  sink(name, type = "output")
-  print(res$roc)
-  cat("\n\n")
-  str(res)
-  sink()
-}
-
-
 
 ##############################################################################
-# 
-##############################################################################
+#' Generate multilabel confusion matrices and related statistics
+#'
+#' @description
+#' This function computes confusion matrix elements (True Positives, False Positives,
+#' True Negatives, and False Negatives) for each label in a multilabel classification task.
+#' It also saves several CSV reports containing summary statistics and intermediate results
+#' for further analysis.
+#'
+#' @details
+#' For each label, the function calculates:
+#' \itemize{
+#'   \item The number of positive and negative instances.
+#'   \item Totals of true and predicted positive/negative cases.
+#'   \item Element-wise confusion values (TP, FP, FN, TN).
+#'   \item Aggregated confusion matrices per label.
+#' }
+#' The results are stored in CSV files, organized under the directory specified in `salva`.
+#'
+#' @param true A binary matrix or data frame with the ground truth labels (0 or 1).
+#' Each column corresponds to one label.
+#' @param pred A binary matrix or data frame with predicted labels (0 or 1),
+#' with the same dimensions and order as `true`.
+#' @param type Character. A short string used as a prefix for naming the output files
+#' (e.g., `"train"`, `"test"`, `"validation"`).
+#' @param salva Character. The directory path where CSV result files will be saved.
+#' @param nomes.rotulos Character vector containing the names of the labels (used as row names in the outputs).
+#'
+#' @return
+#' This function does not return a value. It writes multiple CSV files to disk:
+#' \itemize{
+#'   \item `*-ins-pn.csv`: number of positive and negative instances per label.
+#'   \item `*-trues-preds.csv`: total counts of true/predicted positives and negatives.
+#'   \item `*-tfpn.csv`: element-wise TP, FP, FN, TN matrices.
+#'   \item `*-matrix-confusion.csv`: aggregated confusion matrix per label.
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' true <- data.frame(L1 = c(1,0,1,0), L2 = c(0,1,1,0))
+#' pred <- data.frame(L1 = c(1,0,0,0), L2 = c(1,1,0,0))
+#' nomes.rotulos <- c("Label1", "Label2")
+#' output_dir <- "results"
+#' dir.create(output_dir, showWarnings = FALSE)
+#'
+#' matrix.confusao(true, pred, type = "test", salva = output_dir, nomes.rotulos)
+#' }
+#'
+#' @author Elaine Cecília Gatto - Cissa
+#'
+#' @seealso
+#' [write.csv()], [data.frame()], and other functions for managing multilabel results.
+#'
+#' @note
+#' Ensure that `true` and `pred` have identical dimensions and column order.
+#' The directory specified in `salva` must exist or be writable.
+#'
+#' @export
 matrix.confusao <- function(true, pred, type, salva, nomes.rotulos){ 
   
   bipartition = data.frame(true, pred)
@@ -960,9 +1156,61 @@ matrix.confusao <- function(true, pred, type, salva, nomes.rotulos){
   write.csv(matriz_confusao_por_rotulos, name)
 }
 
-##############################################################
-#
-##############################################################
+
+#########################################################################################################
+#' Evaluate multilabel classification results and save performance metrics
+#'
+#' @description
+#' This function performs multilabel model evaluation by computing confusion matrices
+#' and derived performance measures. It saves the main evaluation results to CSV files
+#' for further analysis and reporting.
+#'
+#' @details
+#' The function uses `multilabel_confusion_matrix()` to generate per-label confusion
+#' matrices from the true and predicted multilabel sets. Then, it computes overall
+#' evaluation metrics using `multilabel_evaluate()` and organizes the results in
+#' structured tables. Summary information, including true/false positives and negatives,
+#' is saved in CSV format.
+#'
+#' @param f Integer or character. Identifier for the current fold (used in cross-validation).
+#' It is appended to column names in the output.
+#' @param y_true Data frame or list. Ground truth labels for the multilabel task.
+#' Must contain one column per label.
+#' @param y_pred Data frame or list. Predicted labels with the same structure as `y_true`.
+#' @param salva Character. Directory path where result files will be saved.
+#' @param nome Character. Base name used to name the output CSV files.
+#'
+#' @return
+#' This function writes the following files to disk:
+#' \itemize{
+#'   \item `<nome>.csv` — evaluation metrics for the given fold.
+#'   \item `<nome>-utiml.csv` — detailed confusion matrix statistics (optional, currently commented).
+#' }
+#' The function does not return an object in R (invisible `NULL`).
+#'
+#' @examples
+#' \dontrun{
+#' # Example: evaluating multilabel predictions for one fold
+#' y_true <- data.frame(L1 = c(1,0,1,0), L2 = c(0,1,1,0))
+#' y_pred <- data.frame(L1 = c(1,0,0,0), L2 = c(1,1,0,0))
+#' output_dir <- "results"
+#' dir.create(output_dir, showWarnings = FALSE)
+#'
+#' avaliacao(f = 1, y_true = y_true, y_pred = y_pred,
+#'           salva = output_dir, nome = "Fold1_results")
+#' }
+#'
+#' @author Elaine Cecília Gatto - Cissa
+#'
+#' @seealso
+#' [multilabel_confusion_matrix()], [multilabel_evaluate()],
+#' [write.csv()] for saving structured outputs.
+#'
+#' @note
+#' The helper functions `multilabel_confusion_matrix()` and `multilabel_evaluate()`
+#' must be available in the environment or loaded from the appropriate library.
+#'
+#' @export
 avaliacao <- function(f, y_true, y_pred, salva, nome){
   
   #salva.0 = paste(salva, "/", nome, "-conf-mat.txt", sep="")
@@ -974,8 +1222,11 @@ avaliacao <- function(f, y_true, y_pred, salva, nome){
   resConfMat = multilabel_evaluate(confmat)
   resConfMat = data.frame(resConfMat)
   names(resConfMat) = paste("Fold-", f, sep="")
+  Measure = rownames(resConfMat)
+  resConfMat = data.frame(Measure, resConfMat)
+  rownames(resConfMat) = NULL
   salva.1 = paste(salva, "/", nome, ".csv", sep="")
-  write.csv(resConfMat, salva.1)
+  write.csv(resConfMat, salva.1, row.names = FALSE)
   
   conf.mat = data.frame(confmat$TPl, confmat$FPl,
                         confmat$FNl, confmat$TNl)
@@ -991,6 +1242,228 @@ avaliacao <- function(f, y_true, y_pred, salva, nome){
   salva.2 = paste(salva, "/", nome, "-utiml.csv", sep="")
   #write.csv(conf.mat.2, salva.2)
   
+  
+}
+
+
+#########################################################################################################
+#' Compute and export ROC curve evaluation for multilabel classification
+#'
+#' @description
+#' This function evaluates the ROC (Receiver Operating Characteristic) metrics
+#' for multilabel classification results and exports the computed metrics to a CSV file.
+#' Optionally, the function can also plot and save the ROC curve (the plotting code
+#' is currently commented out but preserved for reference).
+#'
+#' @details
+#' The function uses \code{mldr_evaluate()} to compute performance metrics and
+#' ROC-related statistics for multilabel models. The results are converted into a
+#' clean data frame and saved to disk. If the ROC object is available, its AUC
+#' (Area Under the Curve) is extracted and appended to the output.
+#'
+#' @param f Integer or character. Identifier of the fold being evaluated (used in cross-validation).
+#' @param y_pred Data frame or list. Predicted label scores or probabilities from the model.
+#' @param test Data frame or list. True labels for the test partition.
+#' @param Folder Character. Directory path where output files (e.g., plots or CSVs) will be saved.
+#' @param nome Character. The name of the output CSV file (including path if needed).
+#'
+#' @return
+#' A CSV file is written to disk containing all evaluation metrics derived from
+#' \code{mldr_evaluate()}, including (if available) the ROC AUC value.
+#' The function does not return an R object (invisible \code{NULL}).
+#'
+#' @examples
+#' \dontrun{
+#' test <- data.frame(L1 = c(1, 0, 1, 0), L2 = c(0, 1, 1, 0))
+#' y_pred <- data.frame(L1 = c(0.9, 0.2, 0.8, 0.3),
+#'                      L2 = c(0.1, 0.7, 0.6, 0.4))
+#' output_dir <- "results"
+#' dir.create(output_dir, showWarnings = FALSE)
+#'
+#' roc.curve(f = 1, y_pred = y_pred, test = test,
+#'           Folder = output_dir,
+#'           nome = paste0(output_dir, "/fold1_roc.csv"))
+#' }
+#'
+#' @author Elaine Cecília Gatto - Cissa
+#'
+#' @seealso
+#' [mldr_evaluate()] for multilabel evaluation,
+#' [plot()] for ROC curve visualization,
+#' and [write.csv()] for saving structured metrics.
+#'
+#' @note
+#' Ensure that the \code{mldr} package (or any library providing \code{mldr_evaluate})
+#' is loaded in your environment. The commented ROC plotting section can be re-enabled
+#' if graphical outputs are required.
+#'
+#' @export
+roc.curve <- function(f, y_pred, test, Folder, nome){
+  
+  res = mldr_evaluate(test, y_pred)
+  
+  ###############################################################
+  # PLOTANDO ROC CURVE
+  #name = paste(Folder, "/roc.pdf", sep="")
+  #pdf(name, width = 10, height = 8)
+  #print(plot(res$roc, print.thres = 'best', print.auc=TRUE, 
+  #            print.thres.cex=0.7, grid = TRUE, identity=TRUE,
+  #            axes = TRUE, legacy.axes = TRUE, 
+  #            identity.col = "#a91e0e", col = "#1161d5",
+  #            main = paste("fold ", f, " ", nome, sep="")))
+  #dev.off()
+  #cat("\n")
+  
+  ###############################################################
+  # Transformar a lista em data frame, removendo 'roc' para evitar problemas
+  df_res <- res
+  if("roc" %in% names(df_res)) df_res$roc <- NULL
+  
+  df_metrics <- data.frame(
+    metric = names(df_res),
+    value = unlist(df_res)
+  )
+  
+  # Se quiser, também adiciona a AUC do objeto ROC
+  if(!is.null(res$roc)) {
+    df_metrics <- rbind(df_metrics, data.frame(
+      metric = "roc_auc",
+      value = res$roc$auc
+    ))
+  }
+  
+  colnames(df_metrics) = c("Measure", "Value")
+  write.csv(df_metrics, nome, row.names = FALSE)
+  
+}
+
+
+#' Compute and export AUPRC (Precision-Recall) metrics for multilabel classification
+#'
+#' @description
+#' This function computes the AUPRC (Area Under the Precision-Recall Curve)
+#' for each label in a multilabel classification problem. It also calculates
+#' macro and micro AUPRC scores and exports the results as CSV files.
+#' Optional plotting code for PR curves is included (commented out).
+#'
+#' @details
+#' The function evaluates per-label and aggregated AUPRC metrics using
+#' the \code{PRROC} package. For each label, a precision-recall curve is
+#' generated when possible (skipping labels with only one class present).
+#' It writes two CSV outputs:
+#' \itemize{
+#'   \item \code{r-auprc-per-label.csv}: AUPRC values for each label.
+#'   \item A file specified by \code{nome}: macro and micro AUPRC scores.
+#' }
+#'
+#' @param y_true Matrix or data frame. True binary labels (0 or 1) for each class.
+#' @param y_proba Matrix or data frame. Predicted probabilities or confidence scores for each class.
+#' @param Folder Character. Directory where output CSV files will be saved.
+#' @param nome Character. The name of the main output CSV file containing macro and micro AUPRC values.
+#'
+#' @return
+#' Two CSV files are written to disk:
+#' \enumerate{
+#'   \item \code{r-auprc-per-label.csv}: per-label AUPRC values.
+#'   \item The file specified in \code{nome}: overall macro and micro AUPRC values.
+#' }
+#' The function does not return an R object (invisible \code{NULL}).
+#'
+#' @examples
+#' \dontrun{
+#' # Example data
+#' y_true <- data.frame(
+#'   L1 = c(1, 0, 1, 0),
+#'   L2 = c(0, 1, 1, 0)
+#' )
+#' y_proba <- data.frame(
+#'   L1 = c(0.9, 0.2, 0.8, 0.3),
+#'   L2 = c(0.1, 0.7, 0.6, 0.4)
+#' )
+#'
+#' # Output directory and filenames
+#' Folder <- "results"
+#' dir.create(Folder, showWarnings = FALSE)
+#'
+#' auprc.curve(y_true = y_true, y_proba = y_proba,
+#'             Folder = Folder,
+#'             nome = paste0(Folder, "/auprc-summary.csv"))
+#' }
+#'
+#' @author Elaine Cecília Gatto - Cissa
+#'
+#' @seealso
+#' [PRROC::pr.curve()] for PR curve and AUPRC computation,
+#' [write.csv()] for saving structured metrics.
+#'
+#' @note
+#' This function requires the \code{PRROC} package.
+#' Labels with no positive or negative instances are skipped (AUPRC = NA).
+#' The commented plotting code can be re-enabled to generate per-label
+#' and global PR curve visualizations.
+#'
+#' @export
+auprc.curve <- function(y_true, y_proba, Folder, nome){
+  library(PRROC)
+  
+  # Garantindo que y_true e y_score sejam matrizes
+  y_true <- as.matrix(y_true)
+  y_score <- as.matrix(y_proba)
+  
+  auprc_list <- c()
+  
+  for(i in 1:ncol(y_true)){
+    cat("\n", i)
+    # Evita erro quando não houver positivos ou negativos
+    if(sum(y_true[, i] == 1) == 0 | sum(y_true[, i] == 0) == 0) {
+      auprc_list[i] <- NA
+      next
+    }
+    
+    pr_obj <- pr.curve(
+      scores.class0 = y_score[y_true[, i] == 1, i],
+      scores.class1 = y_score[y_true[, i] == 0, i],
+      curve = TRUE
+    )
+    
+    auprc_list[i] <- pr_obj$auc.integral
+    
+    #nome = paste("AUPRC-Label", i, ".pdf", sep="")
+    #pdf(file = paste0(Folder, "/", nome), width = 8, height = 6)
+    #plot(pr_obj, main = paste("PR Curve label", i))
+    #dev.off()
+  }
+  
+  auprc_per_labels = data.frame(t(auprc_list))
+  colnames(auprc_per_labels) = colnames(y_true)
+  nome1 = paste(Folder, "/r-auprc-per-label.csv", sep="")
+  write.csv(auprc_per_labels, nome1, row.names = FALSE)
+  
+  # Macro AUPRC
+  auprc_macro <- mean(auprc_list, na.rm = TRUE)
+  
+  # Micro AUPRC: achata tudo
+  y_true_vec <- as.vector(y_true)
+  y_score_vec <- as.vector(y_score)
+  pr_micro <- pr.curve(
+    scores.class0 = y_score_vec[y_true_vec == 1],
+    scores.class1 = y_score_vec[y_true_vec == 0],
+    curve = TRUE
+  )
+  auprc_micro <- pr_micro$auc.integral
+  
+  auprc = data.frame(auprc_micro, auprc_macro)
+  auprc = data.frame(t(auprc))
+  Measure = rownames(auprc)
+  auprc = data.frame(Measure, auprc)
+  rownames(auprc) = NULL
+  colnames(auprc) = c("Measure", "Value")
+  write.csv(auprc, nome, row.names = FALSE)
+  
+  # Salvar gráfico
+  # pdf("PR_micro.pdf", width = 8, height = 6)
+  # plot(pr_micro, main = "Micro-PR Curve (AUPRC Global)")
+  # dev.off()
   
 }
 

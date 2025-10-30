@@ -67,10 +67,12 @@ cat("\n########################################\n\n")
 options(java.parameters = "-Xmx64g")  # JAVA
 options(show.error.messages = TRUE)   # ERROR MESSAGES
 options(scipen=20)                    # number of places after the comma
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+
 
 
 cat("\n########################################")
-cat("\n# Creating parameters list              #")
+cat("\n# Creating parameters list             #")
 cat("\n########################################\n\n")
 parameters = list()
 
@@ -91,7 +93,7 @@ args <- commandArgs(TRUE)
 config_file <- args[1]
 
 
-# config_file = "~/GlobalPartitions/config-files/gr-GpositiveGO-1.csv"
+# config_file = "~/GlobalPartitions/config-files/gr-GnegativeGO-1.csv"
 
 # /home/cissagatto/Documentos/GlobalPartitions/config-files/rf
 
@@ -100,9 +102,9 @@ config_file <- args[1]
 parameters$Config.File$Name = config_file
 if(file.exists(config_file)==FALSE){
   cat("\n################################################################")
-  cat("#\n Missing Config File! Verify the following path:              #")
-  cat("#\n ", config_file, "                                            #")
-  cat("#################################################################\n\n")
+  cat("\n# Missing Config File! Verify the following path:              #")
+  cat("\n################################################################\n\n")
+  cat("\n --------------->", config_file)
   break
 } else {
   cat("\n########################################")
@@ -113,14 +115,14 @@ if(file.exists(config_file)==FALSE){
 
 cat("\n########################################")
 cat("\n# Config File                          #\n")
+cat("\n########################################\n\n")
 config = data.frame(read.csv(config_file))
 print(config)
+
+
+cat("\n########################################")
+cat("\n# Getting Parameters                   #")
 cat("\n########################################\n\n")
-
-
-cat("\n########################################")
-cat("\n# Getting Parameters                   #\n")
-cat("\n########################################")
 FolderScripts = toString(config$Value[1])
 FolderScripts = str_remove(FolderScripts, pattern = " ")
 parameters$Directories$FolderScripts = FolderScripts
@@ -166,7 +168,7 @@ cat("\n########################################\n\n")
 if (dir.exists(folderResults) == FALSE) {dir.create(folderResults)}
 
 
-cat("\n###############################\n")
+cat("\n###############################")
 cat("\n# Get directories             #")
 cat("\n###############################\n\n")
 diretorios <- directories(parameters)
@@ -262,40 +264,43 @@ if(implementation=="clus"){
   
   
   cat("\n\n#####################################################")
-  cat("\n# RSCRIPT SAVE RUNTIME                              #")
-  cat("\n#####################################################\n\n")
+    cat("\n# RSCRIPT SAVE RUNTIME                              #")
+    cat("\n#####################################################\n\n")
   result_set <- t(data.matrix(timeFinal))
   setwd(parameters$Directories$FolderGlobal)
-  write.csv(result_set, "Final-Runtime.csv", row.names = FALSE)
+  write.csv(result_set, "runtime-script.csv", row.names = FALSE)
   
   
   cat("\n\n###################################################")
-  cat("\n# RSCRIPT DELETE                                  #")
-  cat("\n###################################################\n\n")
+    cat("\n# RSCRIPT DELETE                                  #")
+    cat("\n###################################################\n\n")
   str5 = paste("rm -r ", parameters$Directories$FolderDataset, sep="")
   system(str5)
   
   
-  cat("\n\n###################################################################")
-  cat("\n# GLOBAL: COMPRESS RESULTS                                      #")
-  cat("\n#####################################################################\n\n")
-  tar_file <- paste0(parameters$Directories$FolderResults, "/", 
-                     parameters$Dataset.Info$Name,
-                     "-results-global.tar.gz")
+  cat("\n\n###############################################################")
+    cat("\n# GLOBAL: COMPRESS RESULTS                                    #")
+    cat("\n###############################################################\n\n")
+    tar_file <- paste0(parameters$Directories$FolderResults, "/", 
+                       parameters$Dataset.Info$Name,
+                       "-results-global.tar.gz")
+    
+    # Comando tar incluindo duas pastas
+    str_01 <- paste(
+      "tar -zcvf", tar_file,
+      "-C", parameters$Directories$FolderResults, "."
+    )
+    
+    cat("\nComando:\n", str_01, "\n")
+    system(str_01)
+    
   
-  str_01 <- paste(
-    "tar -zcvf", tar_file,
-    "-C", parameters$Directories$FolderGlobal, "."
-  )
-  cat("\nComando:\n", str_01, "\n")
-  system(str_01)
   
   
-  
-  cat("\n\n###################################################################")
-  cat("\n# ====> GPC: COPY TO HOME                                     #")
-  cat("\n#####################################################################\n\n")
-  str_0 = parameters$Directories$FolderReports
+  cat("\n\n#############################################################")
+    cat("\n# ====> GPC: COPY TO HOME                                   #")
+    cat("\n#############################################################\n\n")
+  str0 = parameters$Directories$FolderReports
   if(dir.exists(str_0)==FALSE){dir.create(str0)}
   
   str_03 = paste(parameters$Directories$FolderResults, "/",
@@ -346,16 +351,16 @@ if(implementation=="clus"){
 
 
 cat("\n\n#######################################################")
-cat("\n# CLEAN                                               #")
-cat("\n#######################################################\n\n")
+  cat("\n# CLEAN                                               #")
+  cat("\n#######################################################\n\n")
 cat("\nDelete folder \n")
 str5 = paste("rm -r ", parameters$Directories$FolderResults, sep="")
 system(str5)
 
 
 cat("\n\n################################################################")
-cat("\n# RSCRIPT SUCCESSFULLY FINISHED                                #")
-cat("\n################################################################\n\n")
+  cat("\n# RSCRIPT SUCCESSFULLY FINISHED                                #")
+  cat("\n################################################################\n\n")
 
 
 rm(list = ls())

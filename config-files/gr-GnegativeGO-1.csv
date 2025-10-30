@@ -1,9 +1,9 @@
 Config, Value
 FolderScripts, ~/GlobalPartitions/R
 Dataset_Path, ~/GlobalPartitions/Datasets
-Temporary_Path, /tmp/gr-emotions
+Temporary_Path, /tmp/gr-GnegativeGO
 Implementation, rf
-Dataset_Name, emotions
-Number_Dataset, 26
+Dataset_Name, GnegativeGO
+Number_Dataset, 39
 Number_Folds, 10
 Number_Cores, 1
