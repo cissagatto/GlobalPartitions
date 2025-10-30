@@ -9,10 +9,10 @@ If you use this code in your research, please cite the following:
 @misc{Gatto2025,
   author = {Gatto, E. C.},
   title = {Global Partitions for Multilabel Classification},
-  year = {2022},
+  year = {2025},
   publisher = {GitHub},
   journal = {GitHub repository},
-  howpublished = {\url{https://github.com/cissagatto/Global-Partitions}}
+  howpublished = {\url{https://github.com/cissagatto/GlobalPartitions}}
 }
 ```
 
@@ -78,15 +78,15 @@ For new datasets, you can generate these files by following the instructions in 
 ### STEP 3: Required Libraries 📦
 Ensure that all necessary Java, R, and Python libraries are installed on your system. This code does not automatically install packages! 🚨
 
-You can use the [Conda Environment](https://1drv.ms/u/s!Aq6SGcf6js1mw4hbhU9Raqarl8bH8Q?e=IA2aQs) that I created to perform this experiment. Below are the links to download the files. Try to use the command below to extract the environment to your computer:
+You can use the [Conda Environment ELCC](https://1drv.ms/u/s!Aq6SGcf6js1mw4hbhU9Raqarl8bH8Q?e=IA2aQs) that I created to perform this experiment. Below are the links to download the files. Try to use the command below to extract the environment to your computer:
 
 ```
-conda env create -f Teste.yml
+conda env create -f ELCC.yml
 ```
 
-For more information on Conda environments, refer to the [official documentation](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
+For more information on Mini-Forge-Conda environments, refer to the [official documentation]().
 
-Alternatively, you can run the code using an [AppTainer container](https://1drv.ms/u/s!Aq6SGcf6js1mw4hcVuz_IN8_Bh1oFQ?e=5NuyxX). Check the [tutorial](https://rpubs.com/cissagatto/apptainer-slurm-r) for setup instructions (in Portuguese).
+Alternatively, you can run the code using an AppTainer container. Check the [tutorial](https://rpubs.com/cissagatto/apptainer-slurm-r) for setup instructions (in Portuguese).
 
 ### STEP 4: Configuration File ⚙️
 You will need a `.csv` configuration file with the following fields:
@@ -108,7 +108,10 @@ For detailed instructions on configuration, refer to the example files.
 
 ## Software Requirements 💻
 - **RStudio** Version 1.4.1106
-- **R Language** Version 4.1.0 (or newer)
+- **R Language** Version 4.5.1
+- **Python** Version 3.10.6
+
+IMPORTANT: there are some versions of python that the AUPRC/ROC computation does not work well.
 
 ## Hardware Requirements 🖥️
 This code can run in parallel, and it's highly recommended to use parallel processing. You can configure the number of cores via the command line. In our experiments, we used 10 cores. To ensure reproducibility, we suggest using the same configuration.

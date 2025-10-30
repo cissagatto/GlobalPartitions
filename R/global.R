@@ -52,9 +52,9 @@ rm(list=ls())
 
 
 
-cat("\n################################")
-cat("\n# Set Work Space               #")
-cat("\n###############################\n\n")
+cat("\n##############################")
+cat("\n# Set Work Space             #")
+cat("\n##############################\n\n")
 library(here)
 library(stringr)
 FolderRoot <- here::here()
@@ -114,7 +114,7 @@ if(file.exists(config_file)==FALSE){
 
 
 cat("\n########################################")
-cat("\n# Config File                          #\n")
+cat("\n# Config File                          #")
 cat("\n########################################\n\n")
 config = data.frame(read.csv(config_file))
 print(config)
@@ -300,8 +300,8 @@ if(implementation=="clus"){
   cat("\n\n#############################################################")
     cat("\n# ====> GPC: COPY TO HOME                                   #")
     cat("\n#############################################################\n\n")
-  str0 = parameters$Directories$FolderReports
-  if(dir.exists(str_0)==FALSE){dir.create(str0)}
+  str_0 = parameters$Directories$FolderReports
+  if(dir.exists(str_0)==FALSE){dir.create(str_0)}
   
   str_03 = paste(parameters$Directories$FolderResults, "/",
                  parameters$Dataset.Info$Name,
