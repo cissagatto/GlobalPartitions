@@ -155,6 +155,8 @@ parameters$Config.File$Number.Cores = number_cores
 ds = datasets[number_dataset,]
 parameters$Dataset.Info = ds
 
+
+
 cat("\n########################################")
 cat("\n# Loading R Sources                    #")
 cat("\n########################################\n\n")
@@ -281,34 +283,36 @@ if(implementation=="clus"){
   cat("\n\n###############################################################")
     cat("\n# GLOBAL: COMPRESS RESULTS                                    #")
     cat("\n###############################################################\n\n")
-    tar_file <- paste0(parameters$Directories$FolderResults, "/", 
-                       parameters$Dataset.Info$Name,
-                       "-results-global.tar.gz")
+    str_01 = paste("tar -zcvf ", parameters$Directories$FolderResults, "/",
+                   parameters$Dataset.Info$Name, "-results-global.tar.gz -C ",
+                   parameters$Directories$FolderResults, " .", sep="")
+    res = system(str_01)
     
-    # Comando tar incluindo duas pastas
-    str_01 <- paste(
-      "tar -zcvf", tar_file,
-      "-C", parameters$Directories$FolderResults, "."
-    )
-    
-    cat("\nComando:\n", str_01, "\n")
-    system(str_01)
-    
-  
+    if(res!=0){
+      system(paste("rm -r ", parameters$Directories$FolderResults, sep=""))
+      print(res)
+      stop("\n\n Something went wrong in compressing results files \n\n")
+    }
   
   
   cat("\n\n#############################################################")
     cat("\n# ====> GPC: COPY TO HOME                                   #")
     cat("\n#############################################################\n\n")
-  str_0 = parameters$Directories$FolderReports
-  if(dir.exists(str_0)==FALSE){dir.create(str_0)}
-  
-  str_03 = paste(parameters$Directories$FolderResults, "/",
-                 parameters$Dataset.Info$Name,
-                 "-results-global.tar.gz", sep="")
-  
-  str_04 = paste("cp ", str_03, " ", str_0, sep="")
-  system(str_04)
+    str_0 = parameters$Directories$FolderReports
+    if(dir.exists(str_0)==FALSE){dir.create(str_0)}
+    
+    str_03 = paste(parameters$Directories$FolderResults, "/",
+                   parameters$Dataset.Info$Name,
+                   "-results-global.tar.gz", sep="")
+    
+    str_04 = paste("cp ", str_03, " ", str_0, sep="")
+    res = system(str_04)
+    
+    if(res!=0){
+      system(paste("rm -r ", parameters$Directories$FolderResults, sep=""))
+      print(res)
+      stop("\n\n Something went wrong in compressing results files \n\n")
+    }
   
   
   # cat("\n\n######################################################")
