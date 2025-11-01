@@ -283,37 +283,43 @@ if(implementation=="clus"){
   cat("\n\n###############################################################")
     cat("\n# GLOBAL: COMPRESS RESULTS                                    #")
     cat("\n###############################################################\n\n")
-    str_01 = paste("tar -zcvf ", parameters$Directories$FolderResults, "/",
-                   parameters$Dataset.Info$Name, "-results-global.tar.gz -C ",
-                   parameters$Directories$FolderResults, " .", sep="")
-    res = system(str_01)
-    
-    if(res!=0){
-      system(paste("rm -r ", parameters$Directories$FolderResults, sep=""))
-      print(res)
-      stop("\n\n Something went wrong in compressing results files \n\n")
-    }
+  folder_results <- parameters$Directories$FolderResults
+  output_tar <- paste0(folder_results, "/", 
+                       parameters$Dataset.Info$Name, 
+                       "-results-global.tar.gz")
+  
+  str_01 <- paste0("tar -zcvf ", output_tar, " -C ", folder_results, " Global Global2")
+  print(str_01)
+  
+  res <- system(str_01)
+  print(res)
+  
+  if(res != 0){
+    system(paste("rm -r ", parameters$Directories$FolderResults, sep=""))
+    print(res)
+    stop("\n\n Something went wrong in compressing results files \n\n")
+  }
   
   
   cat("\n\n#############################################################")
-    cat("\n# ====> GPC: COPY TO HOME                                   #")
+    cat("\n# GLOBAL COPY TO HOME                                       #")
     cat("\n#############################################################\n\n")
-    str_0 = parameters$Directories$FolderReports
-    if(dir.exists(str_0)==FALSE){dir.create(str_0)}
-    
-    str_03 = paste(parameters$Directories$FolderResults, "/",
-                   parameters$Dataset.Info$Name,
-                   "-results-global.tar.gz", sep="")
-    
-    str_04 = paste("cp ", str_03, " ", str_0, sep="")
-    res = system(str_04)
-    
-    if(res!=0){
-      system(paste("rm -r ", parameters$Directories$FolderResults, sep=""))
-      print(res)
-      stop("\n\n Something went wrong in compressing results files \n\n")
-    }
-  
+      str0 = paste0(FolderRoot, "/Reports")
+      if(dir.exists(str0)==FALSE){dir.create(str0)}
+      
+      str4 <- paste0(parameters$Directories$FolderResults, "/",
+        parameters$Dataset.Info$Name, "-results-global.tar.gz")
+      
+      str5 = paste("cp ", str4, " ", str0, sep="")
+      res = system(str5)
+      
+      if(res!=0){
+        system(paste("rm -r ", parameters$Directories$FolderResults, sep=""))
+        print(res)
+        stop("\n\n Something went wrong in compressing results files \n\n")
+      }
+
+
   
   # cat("\n\n######################################################")
   # cat("\n# RSCRIPT COPY TO GOOGLE DRIVE                       #")
