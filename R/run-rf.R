@@ -130,33 +130,19 @@ run.rf <- function(parameters){
   time.execute = system.time(execute.global.python(parameters))
   
   
-  cat("\n\n##########################################################")
-    cat("\n# RUN: Evaluate 1                                        #")
-    cat("\n##########################################################\n\n")
+  cat("\n\n#########################################################")
+    cat("\n# RUN: Evaluate                                         #")
+    cat("\n#########################################################\n\n")
   time.evaluate = system.time(evaluate.global.python(parameters,
                                                      folder = parameters$Directories$FolderGlobal))
   
   
-  cat("\n\n########################################################")
-    cat("\n# RUN: Evaluate 2                                      #")
-    cat("\n########################################################\n\n")
-  time.evaluate2 = system.time(evaluate.global.python(parameters,
-                                                       folder = parameters$Directories$FolderGlobal2))
-  
-  
-  cat("\n\n##########################################################")
-    cat("\n# RUN: Gather Evaluated Measures 1                       #")
-    cat("\n##########################################################\n\n")
+  cat("\n\n#########################################################")
+    cat("\n# RUN: Gather Evaluated Measures                        #")
+    cat("\n#########################################################\n\n")
   time.gather.evaluate.1 = system.time(gather.eval.python.silho(parameters, 
                                                                 folder = parameters$Directories$FolderGlobal))
-  
-  
-  cat("\n\n##########################################################")
-    cat("\n# RUN: Gather Evaluated Measures2                        #")
-    cat("\n##########################################################\n\n")
-  time.gather.evaluate = system.time(gather.eval.python.silho(parameters, 
-                                                              folder = parameters$Directories$FolderGlobal2))
-  
+
   
   #cat("\n\n###########################################################")
   #  cat("\n# RUN: Save Runtime                                       #")

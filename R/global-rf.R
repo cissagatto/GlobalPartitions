@@ -194,31 +194,31 @@ execute.global.python <- function(parameters){
     
     ##################################################################
     # EXECUÇÃO COM TRATAMENTO DA AURPC/ROC
-    FolderG = paste(parameters$Directories$FolderResults, 
-                    "/Global2", sep="")
-    if(dir.exists(FolderG)==FALSE){dir.create(FolderG)}
-    
-    FolderSplit2 = paste(FolderG, "/Split-", f, sep="")
-    if(dir.exists(FolderSplit2)==FALSE){dir.create(FolderSplit2)}
-    
-    str.execute2 = paste("python3 ", parameters$Directories$FolderPython,
-                        "/global2.py ", 
-                        nome.tr.csv, " ",
-                        nome.vl.csv,  " ",
-                        nome.ts.csv, " ", 
-                        start = as.numeric(parameters$Dataset.Info$AttEnd), " ",
-                        FolderSplit = FolderSplit2, " ", 
-                        fold = f,
-                        sep="")
-    
-    res = system(str.execute2)
-    if(res!=0){
-      system(paste("rm -r ", parameters$Directories$FolderResults, sep=""))
-      stop("\n\n Something went wrong in python VERSION 2\n\n")
-    } else {
-      message("\n\n PYTHON RAN OK! \n\n")
-    }
-    
+    # FolderG = paste(parameters$Directories$FolderResults, 
+    #                 "/Global2", sep="")
+    # if(dir.exists(FolderG)==FALSE){dir.create(FolderG)}
+    # 
+    # FolderSplit2 = paste(FolderG, "/Split-", f, sep="")
+    # if(dir.exists(FolderSplit2)==FALSE){dir.create(FolderSplit2)}
+    # 
+    # str.execute2 = paste("python3 ", parameters$Directories$FolderPython,
+    #                     "/global2.py ", 
+    #                     nome.tr.csv, " ",
+    #                     nome.vl.csv,  " ",
+    #                     nome.ts.csv, " ", 
+    #                     start = as.numeric(parameters$Dataset.Info$AttEnd), " ",
+    #                     FolderSplit = FolderSplit2, " ", 
+    #                     fold = f,
+    #                     sep="")
+    # 
+    # res = system(str.execute2)
+    # if(res!=0){
+    #   system(paste("rm -r ", parameters$Directories$FolderResults, sep=""))
+    #   stop("\n\n Something went wrong in python VERSION 2\n\n")
+    # } else {
+    #   message("\n\n PYTHON RAN OK! \n\n")
+    # }
+    # 
     
     ##################################################################
     # EXECUÇÃO NORMAL
@@ -239,9 +239,6 @@ execute.global.python <- function(parameters){
     } else {
       message("\n\n PYTHON RAN OK! \n\n")
     }
-    
-    
-    
     
     # f = f + 1
     gc()
@@ -354,10 +351,7 @@ evaluate.global.python <- function(parameters, folder){
     ##########################################################################    
     avaliacao(f = f, y_true = y.true.3, y_pred = y_pred_proba,
               salva = FolderSplit, nome = "results-utiml")
-    
-    ##########################################################################    
-    avaliacao(f = f, y_true = y.true.3, y_pred = y_pred_proba,
-              salva = FolderSplit, nome = "results-utiml")
+
     
     ##########################################################################    
     roc.curve(f = f, y_pred = y_pred_proba, test = y.true.3, 
@@ -370,6 +364,26 @@ evaluate.global.python <- function(parameters, folder){
                 y_proba = y_pred_proba,
                 Folder = FolderSplit, 
                 nome = paste(FolderSplit, "/results-r.csv", sep=""))
+    
+    #########################################################################
+    name.true = paste0(FolderSplit, "/y_true.csv")
+    name.proba = paste0(FolderSplit, "/y_pred_proba.csv")
+    
+    str.execute = paste("python3 ", parameters$Directories$FolderPython,
+                        "/curves.py ", 
+                        name.true, " ", 
+                        name.proba, " ", 
+                        FolderSplit, " ", 
+                        sep = "")
+    res = system(str.execute)
+    
+    if(res!=0){
+      #system(paste("rm -r ", parameters$Directories$FolderResults, sep=""))
+      #stop("\n\n Something went wrong in python\n\n")
+      message("\n\n Something went wrong in python \n\n")
+    } else {
+      message("\n\n PYTHON RAN OK! \n\n")
+    }
     
     
     # ###########################################################################
@@ -395,7 +409,6 @@ evaluate.global.python <- function(parameters, folder){
     if(file.exists(nome.vl.csv)){
       system(paste0("rm -r ", nome.vl.csv))
     }
-    
     
 
     # f = f + 1
@@ -453,7 +466,7 @@ gather.eval.python.silho <- function(parameters, folder){
     if (length(arquivos_faltando) > 0) {
       cat("\n\nErro: os seguintes arquivos não foram encontrados no fold", f, ":\n")
       print(arquivos_faltando)
-      stop("\n\nExecução interrompida — arquivos ausentes.")
+      message("\n\nArquivos ausentes.")
     }
     
     
@@ -514,6 +527,11 @@ gather.eval.python.silho <- function(parameters, folder){
     f = f + 1
     gc()
   } 
+  
+  final.results <- final.results[, !duplicated(colnames(final.results))]
+  final.results = final.results[,-1]
+  nome = paste0(folder, "/performance.csv")
+  write.csv(final.results, nome, row.names = FALSE)
   
   final.results <- final.results[, !duplicated(colnames(final.results))]
   final.results = final.results[,-1]

@@ -85,14 +85,14 @@ if __name__ == '__main__':
     fold = 1
     """
 
-    print("\n\n%==============================================%")
-    print("train: ", sys.argv[1])
-    print("valid: ", sys.argv[2])
-    print("test: ", sys.argv[3])
-    print("start: ", sys.argv[4])
+    print("\n%==============================================%")
+    #print("train: ", sys.argv[1])
+    #print("valid: ", sys.argv[2])
+    #print("test: ", sys.argv[3])
+    #print("start: ", sys.argv[4])
     print("directory: ", sys.argv[5])
-    print("fold: ", sys.argv[6])
-    print("%==============================================%\n\n")
+    #print("fold: ", sys.argv[6])
+    print("%==============================================%\n")
      
     # Merge train and validation sets
     train = pd.concat([train, valid], axis=0).reset_index(drop=True)
@@ -184,8 +184,8 @@ if __name__ == '__main__':
 
 
     # =========== SAVE MEASURES ===========   
-    metrics_df = eval.multilabel_curves_measures(Y_test, pd.DataFrame(probabilities, columns=labels_y_test))
-    metrics_df.to_csv(os.path.join(directory, "results-python.csv"), index=False)        
+    #metrics_df = eval.multilabel_curves_measures(Y_test, pd.DataFrame(probabilities, columns=labels_y_test))
+    #metrics_df.to_csv(os.path.join(directory, "results-python.csv"), index=False)        
     
     # metrics_df, ignored_df = eval.multilabel_curve_metrics(Y_test, probabilities_df)        
     # name = (directory + "/results-python.csv") 

@@ -93,7 +93,7 @@ while(w<=length(Implementation.1)){
     # print the dataset name
     cat("\n================================================")
     cat("\n\tDataset:", ds$Name)
-    cat("\n\tPackge:", Implementation.1[w])
+    cat("\n\tPacakge:", Implementation.1[w])
     
     file_name = paste(FolderPa, "/g", Implementation.2[w], "-",
                       ds$Name, ".csv", sep="")

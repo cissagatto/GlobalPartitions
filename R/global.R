@@ -279,46 +279,54 @@ if(implementation=="clus"){
   str5 = paste("rm -r ", parameters$Directories$FolderDataset, sep="")
   system(str5)
   
+  str5 = paste("rm -r ", parameters$Directories$FolderResults, "/Global2", sep="")
+  system(str5)
   
-  cat("\n\n###############################################################")
-    cat("\n# GLOBAL: COMPRESS RESULTS                                    #")
-    cat("\n###############################################################\n\n")
-  folder_results <- parameters$Directories$FolderResults
-  output_tar <- paste0(folder_results, "/", 
-                       parameters$Dataset.Info$Name, 
-                       "-results-global.tar.gz")
   
-  str_01 <- paste0("tar -zcvf ", output_tar, " -C ", folder_results, " Global Global2")
-  print(str_01)
+  cat("\n############################################################")
+  cat("\n# GLOBAL: COMPRESS RESULTS                                 #")
+  cat("\n############################################################\n\n")
   
-  res <- system(str_01)
-  print(res)
+  # base_dir   <- "/tmp/d-GnegativeGO/Tested"
+  base_dir   <- parameters$Directories$FolderGlobal
   
-  if(res != 0){
-    system(paste("rm -r ", parameters$Directories$FolderResults, sep=""))
-    print(res)
-    stop("\n\n Something went wrong in compressing results files \n\n")
+  # output_tar <- "/tmp/d-GnegativeGO/GnegativeGO-results-hpml.tar.gz"
+  output_tar <- paste0(parameters$Directories$FolderResults, "/",
+                       parameters$Dataset.Info$Name, "-results-global.tar.gz")
+  
+  cmd <- paste("tar -zcvf", output_tar, "-C", base_dir, ".")
+  res = system(cmd)
+  
+  if (res != 0) {
+    #system(paste("rm -r", base_dir))
+    #print(res)
+    message("\n\n Something went wrong in compressing results files \n\n")
+  } else {
+    cat("\n✅ Compressão concluída com sucesso!\n")
   }
   
   
-  cat("\n\n#############################################################")
-    cat("\n# GLOBAL COPY TO HOME                                       #")
-    cat("\n#############################################################\n\n")
-      str0 = paste0(FolderRoot, "/Reports")
-      if(dir.exists(str0)==FALSE){dir.create(str0)}
-      
-      str4 <- paste0(parameters$Directories$FolderResults, "/",
-        parameters$Dataset.Info$Name, "-results-global.tar.gz")
-      
-      str5 = paste("cp ", str4, " ", str0, sep="")
-      res = system(str5)
-      
-      if(res!=0){
-        system(paste("rm -r ", parameters$Directories$FolderResults, sep=""))
-        print(res)
-        stop("\n\n Something went wrong in compressing results files \n\n")
-      }
-
+  cat("\n#########################################################")
+  cat("\n# GLOBAL: COPY TO HOME                                  #")
+  cat("\n#########################################################\n\n")
+  #FolderRoot <- here::here()
+  str0 = paste0(FolderRoot, "/Reports")
+  if(dir.exists(str0)==FALSE){dir.create(str0)}
+  
+  str4 <- paste0(parameters$Directories$FolderResults, "/",
+                 parameters$Dataset.Info$Name, "-results-global.tar.gz")
+  
+  str5 = paste("cp ", str4, " ", str0, sep="")
+  res = system(str5)
+  
+  if(res!=0){
+    #system(paste("rm -r ", parameters$Directories$FolderResults, sep=""))
+    #print(res)
+    message("\n\n Something went wrong in compressing results files \n\n")
+  } else{
+    message("\nOK")
+  }
+  
 
   
   # cat("\n\n######################################################")
